@@ -1,0 +1,203 @@
+/* ===========================================================
+   HRMS Platform — data table system
+   Toolbar, table, sticky columns, pagination, filter chips.
+   =========================================================== */
+
+/* ---------- Toolbar (search left, actions right) ---------- */
+.table-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: .75rem; margin-bottom: .85rem;
+}
+.table-toolbar-left, .table-toolbar-right { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+
+.search-input {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0 .4rem 0 .8rem;
+  height: 36px;
+  min-width: 240px;
+}
+.search-input .icon { color: var(--color-muted); flex: 0 0 auto; }
+.search-input input {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  font-size: var(--fs-caption);
+  color: var(--color-text);
+  width: 100%;
+  height: 100%;
+}
+/* The global accessibility focus ring (theme.css: `:focus-visible`, `input:focus-visible`)
+   otherwise paints its own outline/box-shadow directly on this bare input too, stacking on
+   top of .search-input:focus-within's ring below and reading as a second inner search box.
+   The wrapper is the single focus indicator for this component — the input itself stays bare. */
+.search-input input:focus,
+.search-input input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+}
+.search-input .clear-btn { border: 0; background: none; color: var(--color-muted); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
+.search-input .clear-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
+.search-input:focus-within { border-color: var(--color-primary); box-shadow: var(--shadow-focus); }
+
+/* ---------- Filters bar — single compact toolbar row ----------
+   Every filter control is capped to a narrow width so the whole toolbar
+   (search + up to ~6 selects + Clear) fits on one row at desktop widths
+   instead of wrapping to two; it still wraps gracefully below that. */
+.filters-bar {
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .3rem;
+}
+.filters-bar .search-input { width: 280px; flex: 0 0 280px; height: var(--h-btn-sm); }
+.filters-bar > input[type="date"] { width: 140px; flex: 0 0 140px; }
+.filters-bar .form-select, .filters-bar .form-control { width: 128px; flex: 0 0 128px; }
+.filters-bar .select2-container { width: 150px !important; flex: 0 0 150px; }
+.filters-bar .btn { flex: 0 0 auto; }
+/* A toolbar with many filters (e.g. Employees: search + 6 selects) is
+   genuinely too much for one row even collapsed this far at 1440px — rather
+   than truncate every label further, let it wrap to a clean second row
+   instead of overflowing; narrower toolbars (most modules) fit on one row
+   as intended. */
+@media (min-width: 1600px) {
+  .filters-bar .form-select, .filters-bar .form-control { width: 140px; flex: 0 0 140px; }
+}
+.filter-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 .35rem; margin-left: .3rem;
+  border-radius: var(--radius-pill); background: var(--color-primary); color: var(--text-on-primary);
+  font-size: 10px; font-weight: 700; line-height: 1;
+}
+.filter-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: var(--fs-caption); font-weight: 500;
+  padding: .35rem .5rem .35rem .75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+.filter-chip.is-active { background: var(--color-primary-soft); border-color: var(--color-primary-soft); color: var(--color-primary-text); }
+.filter-chip .remove { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; }
+.filter-chip .remove:hover { background: rgba(0, 0, 0, .08); }
+.filters-clear { font-size: var(--fs-caption); font-weight: 600; color: var(--color-primary-text); background: none; border: 0; padding: 0; }
+
+/* ---------- Table shell ---------- */
+.table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.table-wrap-scroll-y { max-height: 65vh; overflow-y: auto; }
+.table-scroll { overflow-x: auto; scrollbar-width: none; }
+.table-scroll::-webkit-scrollbar { height: 0; }
+.table-scroll:hover { scrollbar-width: thin; }
+.table-scroll:hover::-webkit-scrollbar { height: 5px; }
+
+table.table-compact { margin-bottom: 0; font-size: var(--fs-table); width: 100%; }
+table.table-compact.table-min-w-lg { min-width: 1100px; }
+
+table.table-compact thead th {
+  height: 35px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-2);
+  border-bottom: 2px solid var(--color-primary-soft);
+  padding: 0 .9rem;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  vertical-align: middle;
+}
+table.table-compact thead tr:first-child th:first-child { border-top-left-radius: var(--radius-lg); }
+table.table-compact thead tr:first-child th:last-child { border-top-right-radius: var(--radius-lg); }
+
+table.table-compact tbody td {
+  height: 32px;
+  padding: .2rem .9rem;
+  line-height: 1.25;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+table.table-compact tbody tr:last-child td { border-bottom: none; }
+table.table-compact tbody tr {
+  transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+table.table-compact tbody tr:hover { background: var(--color-surface-2); }
+table.table-compact tbody tr:has([data-row-select]:checked),
+table.table-compact tbody tr.is-selected { background: var(--color-primary-soft); }
+table.table-compact thead th[aria-sort="ascending"],
+table.table-compact thead th[aria-sort="descending"],
+table.table-compact thead th.is-sorted,
+table.table-compact thead th a.is-sorted { color: var(--color-primary-text); }
+table.table-compact tbody tr:nth-child(even) { background: rgba(247, 248, 252, .5); }
+:root[data-theme="dark"] table.table-compact tbody tr:nth-child(even) { background: rgba(255, 255, 255, .015); }
+table.table-compact tbody tr:nth-child(even):hover { background: var(--color-surface-2); }
+
+/* Sticky first (identity) and last (actions) columns for wide tables */
+table.table-compact.table-sticky-cols td:first-child,
+table.table-compact.table-sticky-cols th:first-child {
+  position: sticky; left: 0; background: inherit; z-index: 1;
+}
+table.table-compact.table-sticky-cols td:last-child,
+table.table-compact.table-sticky-cols th:last-child {
+  position: sticky; right: 0; background: inherit; z-index: 1;
+}
+
+/* ---------- Employee-style identity cell ---------- */
+.cell-identity { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+.cell-identity .name { font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-identity .sub { font-size: 12px; color: var(--color-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Pagination (premium) ---------- */
+.pagination-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
+.pagination-summary { font-size: var(--fs-caption); color: var(--color-text-secondary); }
+.pagination-summary strong { color: var(--color-text); font-weight: 700; }
+.pagination-controls { display: flex; align-items: center; gap: .3rem; }
+.pagination-controls .page-btn {
+  min-width: 32px; height: 32px; padding: 0 .5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption); font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center; gap: .25rem;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.pagination-controls .page-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
+.pagination-controls .page-btn.is-active { background: var(--color-primary); border-color: var(--color-primary); color: var(--text-on-primary); }
+.pagination-controls .page-btn:disabled, .pagination-controls .page-btn.is-disabled { opacity: .4; cursor: not-allowed; }
+.pagination-controls .page-ellipsis { color: var(--color-muted); padding: 0 .2rem; font-size: var(--fs-caption); }
+.pagination-per-page { display: flex; align-items: center; gap: .4rem; font-size: var(--fs-caption); color: var(--color-text-secondary); }
+.pagination-per-page select { height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: var(--fs-caption); padding: 0 .4rem; background: var(--color-surface); }
+.pagination-jump { display: flex; align-items: center; gap: .4rem; font-size: var(--fs-caption); color: var(--color-text-secondary); }
+.pagination-jump input { width: 48px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); text-align: center; font-size: var(--fs-caption); }
+
+/* ---------- Density modifiers (opt-in via [data-density-toggle], see table-toolkit.js) ---------- */
+.table-wrap.density-compact table.table-compact tbody td { height: 28px; padding: .15rem .9rem; }
+.table-wrap.density-compact table.table-compact thead th { height: 35px; }
+.table-wrap.density-spacious table.table-compact tbody td { height: 48px; padding: .5rem .9rem; }
+.table-wrap.density-spacious table.table-compact thead th { height: 40px; }
+
+/* ---------- Export menu ---------- */
+.export-menu .dropdown-item .icon { color: var(--color-muted); }
+
+/* ---------- Responsive: cards-on-mobile fallback ---------- */
+@media (max-width: 767px) {
+  .filters-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: .2rem; }
+  .pagination-bar { justify-content: center; text-align: center; }
+}

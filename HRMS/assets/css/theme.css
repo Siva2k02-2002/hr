@@ -1,0 +1,309 @@
+/* ===========================================================
+   HRMS Platform — theme tokens
+   Palette, typography, base resets, scrollbar, motion, focus.
+   Loaded first; every other stylesheet consumes these variables.
+   =========================================================== */
+
+:root {
+  /* ---- Brand & semantic colors ----
+     Company branding. layouts/main.php and layouts/auth.php inject a
+     <style id="company-branding"> after this file (see helpers/branding_helper.php)
+     that overrides everything below per tenant — base colors, hover, soft
+     background, readable text, text-on-color — separately for light and dark.
+     These are only the static fallbacks (default palette) for pages rendered
+     without that block; the derived tokens use color-mix() so they still track
+     the base color and the active theme's surface. Per color:
+       --color-X            base            --color-X-rgb   "r, g, b" for rgba()
+       --color-X-hover      hover/active    --color-X-soft  tinted background
+       --color-X-text       readable as text/icon on the soft background
+       --text-on-X          text/icon on the base color */
+  --color-primary: #5B3DF5;
+  --color-secondary: #64748B;
+  --color-success: #16A34A;
+  --color-warning: #EA580C;
+  --color-danger: #DC2626;
+  --color-info: #2563EB;
+
+  --color-primary-rgb: 91, 61, 245;
+  --color-secondary-rgb: 100, 116, 139;
+  --color-success-rgb: 22, 163, 74;
+  --color-warning-rgb: 234, 88, 12;
+  --color-danger-rgb: 220, 38, 38;
+  --color-info-rgb: 37, 99, 235;
+
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 88%, black);
+  --color-secondary-hover: color-mix(in srgb, var(--color-secondary) 88%, black);
+  --color-success-hover: color-mix(in srgb, var(--color-success) 88%, black);
+  --color-warning-hover: color-mix(in srgb, var(--color-warning) 88%, black);
+  --color-danger-hover: color-mix(in srgb, var(--color-danger) 88%, black);
+  --color-info-hover: color-mix(in srgb, var(--color-info) 88%, black);
+
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  --color-secondary-soft: color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface));
+  --color-success-soft: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
+  --color-info-soft: color-mix(in srgb, var(--color-info) 12%, var(--color-surface));
+
+  --color-primary-text: var(--color-primary);
+  --color-secondary-text: var(--color-secondary);
+  --color-success-text: var(--color-success);
+  --color-warning-text: var(--color-warning);
+  --color-danger-text: var(--color-danger);
+  --color-info-text: var(--color-info);
+
+  --text-on-primary: white;
+  --text-on-secondary: white;
+  --text-on-success: white;
+  --text-on-warning: white;
+  --text-on-danger: white;
+  --text-on-info: white;
+  --text-on-primary-hover: white;
+  --text-on-secondary-hover: white;
+  --text-on-success-hover: white;
+  --text-on-warning-hover: white;
+  --text-on-danger-hover: white;
+  --text-on-info-hover: white;
+
+  --color-accent: #14B8A6;
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+
+  /* ---- Surfaces ---- */
+  --color-bg: #F5F5FB;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #FAFAFE;
+  --color-border: #E0E1EC;
+
+  /* ---- Text ---- */
+  --color-text: #1A1B2E;
+  --color-text-secondary: #5C5F77;
+  --color-muted: #8688A3;
+
+  /* ---- Layout ---- */
+  --sidebar-w-expanded: 260px;
+  --sidebar-w-collapsed: 72px;
+  --topbar-h: 56px;
+
+  /* ---- Radius — flatter, matching Super Admin's compact geometry ---- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-input: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-pill: 999px;
+
+  /* ---- Control heights (buttons, inputs, Select2 stay visually aligned) ---- */
+  --h-btn: 36px;
+  --h-btn-sm: 32px;
+  --h-input: 38px;
+
+  /* ---- Shadow — subtler, matching Super Admin's flat shadow style ---- */
+  --shadow-card: 0 1px 2px rgba(26, 27, 46, .04), 0 2px 8px rgba(26, 27, 46, .05);
+  --shadow-pop: 0 4px 16px rgba(26, 27, 46, .12);
+  --shadow-focus: 0 0 0 3px var(--color-primary-soft);
+
+  /* ---- Motion ---- */
+  --dur-fast: 180ms;
+  --dur-base: 220ms;
+  --dur-slow: 250ms;
+  --ease: cubic-bezier(.4, 0, .2, 1);
+
+  /* ---- Type scale ---- */
+  --fs-label: 11px;
+  --fs-caption: 12px;
+  --fs-table: 13px;
+  --fs-body: 14px;
+  --fs-input: 16px;
+  --fs-section: 18px;
+  --fs-page-title: 20px;
+  --fs-dashboard-title: 28px;
+
+  --font-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---- Dark theme ----
+   Toggled via app.js (window.themeToggleBtn handler) and the early inline
+   script in layouts/main.php / auth.php, both of which set data-theme AND
+   data-bs-theme together. data-bs-theme activates Bootstrap 5.3's own
+   built-in dark palette (--bs-body-bg, --bs-card-bg, --bs-modal-bg,
+   --bs-table-*, --bs-dropdown-*, --bs-form-check-bg, --bs-pagination-*, …)
+   so every stock Bootstrap component this app doesn't hand-restyle (modals,
+   native tables, form-check boxes, list groups, etc.) goes dark too —
+   without that, only the classes below with explicit var(--color-*) rules
+   would ever change, leaving the rest permanently white. The remap here
+   then pulls those Bootstrap tokens onto our own palette so both systems
+   agree on the exact same colors instead of two different dark grays. */
+:root[data-theme="dark"] {
+  /* Brand/semantic tokens are recomputed for dark by the injected company-branding
+     <style>. The static fallbacks above already adapt: the *-soft mixes use
+     --color-surface, and the text tokens are lightened here. */
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
+  --color-secondary-soft: color-mix(in srgb, var(--color-secondary) 20%, var(--color-surface));
+  --color-success-soft: color-mix(in srgb, var(--color-success) 20%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 20%, var(--color-surface));
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 20%, var(--color-surface));
+  --color-info-soft: color-mix(in srgb, var(--color-info) 20%, var(--color-surface));
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface));
+
+  --color-primary-text: color-mix(in srgb, var(--color-primary) 55%, white);
+  --color-secondary-text: color-mix(in srgb, var(--color-secondary) 55%, white);
+  --color-success-text: color-mix(in srgb, var(--color-success) 55%, white);
+  --color-warning-text: color-mix(in srgb, var(--color-warning) 55%, white);
+  --color-danger-text: color-mix(in srgb, var(--color-danger) 55%, white);
+  --color-info-text: color-mix(in srgb, var(--color-info) 55%, white);
+
+  --color-bg: #0F1117;
+  --color-surface: #171922;
+  --color-surface-2: #1D202B;
+  --color-border: #2A2E3A;
+
+  --color-text: #EDEFF5;
+  --color-text-secondary: #9CA3B5;
+  --color-muted: #6B7280;
+
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, .35);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, .5);
+
+  /* Native form controls (date/time pickers, select popups, scrollbars)
+     paint their own chrome from this — without it they stay light-themed
+     even though every custom control around them is dark. */
+  color-scheme: dark;
+
+  /* ---- Bootstrap 5 variable remap ---- */
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--color-text);
+  --bs-border-color: var(--color-border);
+  --bs-border-color-translucent: var(--color-border);
+  --bs-secondary-bg: var(--color-surface-2);
+  --bs-tertiary-bg: var(--color-surface-2);
+  --bs-secondary-color: var(--color-text-secondary);
+  --bs-tertiary-color: var(--color-muted);
+  --bs-emphasis-color: var(--color-text);
+  --bs-heading-color: var(--color-text);
+  --bs-link-color: var(--color-primary);
+  --bs-link-hover-color: var(--color-primary-hover);
+
+  --bs-card-bg: var(--color-surface);
+  --bs-card-border-color: var(--color-border);
+  --bs-card-cap-bg: var(--color-surface-2);
+
+  --bs-modal-bg: var(--color-surface);
+  --bs-modal-color: var(--color-text);
+  --bs-modal-border-color: var(--color-border);
+  --bs-modal-header-border-color: var(--color-border);
+  --bs-modal-footer-border-color: var(--color-border);
+  --bs-backdrop-bg: #000000;
+
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--color-text);
+  --bs-table-border-color: var(--color-border);
+  --bs-table-striped-bg: var(--color-surface-2);
+  --bs-table-hover-bg: var(--color-surface-2);
+
+  --bs-dropdown-bg: var(--color-surface);
+  --bs-dropdown-color: var(--color-text);
+  --bs-dropdown-link-color: var(--color-text);
+  --bs-dropdown-border-color: var(--color-border);
+  --bs-dropdown-link-hover-bg: var(--color-surface-2);
+  --bs-dropdown-link-hover-color: var(--color-text);
+  --bs-dropdown-divider-bg: var(--color-border);
+
+  --bs-form-check-bg: var(--color-surface-2);
+  --bs-form-control-bg: var(--color-surface);
+  --bs-form-control-color: var(--color-text);
+
+  --bs-pagination-bg: var(--color-surface);
+  --bs-pagination-color: var(--color-text);
+  --bs-pagination-border-color: var(--color-border);
+  --bs-pagination-hover-bg: var(--color-surface-2);
+  --bs-pagination-hover-color: var(--color-text);
+  --bs-pagination-disabled-bg: var(--color-surface);
+  --bs-pagination-disabled-border-color: var(--color-border);
+
+  --bs-list-group-bg: var(--color-surface);
+  --bs-list-group-color: var(--color-text);
+  --bs-list-group-border-color: var(--color-border);
+  --bs-list-group-hover-bg: var(--color-surface-2);
+
+  --bs-nav-tabs-border-color: var(--color-border);
+  --bs-nav-tabs-link-hover-border-color: var(--color-border);
+
+  --bs-code-color: var(--color-accent);
+}
+
+/* Accent color drives the *native* rendering of checkboxes/radios (and, in
+   Chromium/Firefox, range/progress) before any Bootstrap/custom CSS is
+   applied — belt-and-suspenders alongside the --bs-form-check-* remap
+   above so an unchecked box never flashes the browser's default white. */
+:root[data-theme="dark"] { accent-color: var(--color-primary); }
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Several components (.btn, .sidebar-link, …) declare their own `display`,
+   which otherwise beats the UA stylesheet's `[hidden] { display: none }` on
+   specificity — toggling the `hidden` attribute via JS would silently do
+   nothing on any of them without this. */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--color-primary); text-decoration: none; transition: color var(--dur-fast) var(--ease); }
+a:hover { color: var(--color-primary-hover); }
+
+h1, h2, h3, h4, h5, h6 { font-weight: 700; color: var(--color-text); margin: 0; }
+
+/* ---- Focus rings (accessibility) ---- */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+a:focus-visible, button:focus-visible, .btn:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  box-shadow: var(--shadow-focus);
+}
+
+/* ---- Global scrollbar ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) transparent;
+}
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Lucide icon defaults ---- */
+[data-lucide], .icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2px;
+  vertical-align: -3px;
+  flex: 0 0 auto;
+}
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 20px; height: 20px; }
+.icon-xl { width: 28px; height: 28px; }

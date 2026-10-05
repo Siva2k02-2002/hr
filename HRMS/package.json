@@ -1,0 +1,12 @@
+{
+  "name": "hrms-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for the tenant HRMS app (Phase 4: Employee Master).",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  }
+}

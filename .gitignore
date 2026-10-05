@@ -1,0 +1,21 @@
+# Track only the two applications
+*
+!.gitignore
+!HRMS/
+!HRMS/**
+!superadmin/
+!superadmin/**
+
+# Sensitive and archive types (placed after the allow rules so they win)
+.env
+.env.*
+!.env.production.example
+*.zip
+*.bak
+*.log
+*.sql
+!HRMS/hrms_siva_manual_install.sql
+*.pem
+*.key
+*.p12
+*.pfx

@@ -1,0 +1,828 @@
+/* ===========================================================
+   HRMS Platform — shared components
+   Topbar, page header, cards, buttons, badges, modals, drawer,
+   toast, confirm dialog, skeletons, empty/error states,
+   notification panel, breadcrumb, dropdown menu.
+   =========================================================== */
+
+.app-shell { display: flex; min-height: 100vh; }
+.main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.content { flex: 1; min-width: 0; padding: 0.56rem 0.56rem 0.56rem; }
+/* padding: 1.25rem 1.5rem 2rem; */
+/* ---------- Topbar ---------- */
+.topbar {
+  /* height: var(--topbar-h); */
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1.25rem;
+  background: var(--header-bg, var(--color-surface));
+  border-bottom: 1px solid var(--header-border, var(--color-border));
+  color: var(--header-text, var(--color-text));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* --header-* are only defined when the company picked a header color (see
+   helpers/branding_helper.php); otherwise every fallback is the normal theme token. */
+.topbar-toggle {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--header-border, var(--color-border)); background: var(--header-bg, var(--color-surface));
+  display: none; align-items: center; justify-content: center; color: var(--header-muted, var(--color-text-secondary));
+  cursor: pointer;
+  margin-right: .5rem;
+}
+.topbar-title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.topbar-title h1 { font-size: var(--fs-section); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--header-text, var(--color-text)); }
+.topbar .breadcrumb, .topbar .breadcrumb a { color: var(--header-muted, var(--color-muted)); }
+.topbar .breadcrumb a:hover { color: var(--header-text, var(--color-primary-text)); }
+.topbar .breadcrumb .current { color: var(--header-text, var(--color-text-secondary)); }
+.breadcrumb {
+  display: flex; align-items: center; gap: .5rem; margin: 0; padding: 0; list-style: none;
+  font-size: 11px; color: var(--color-muted);
+}
+.breadcrumb .icon { width: 12px; height: 12px; }
+.breadcrumb a { color: var(--color-muted); }
+.breadcrumb a:hover { color: var(--color-primary-text); }
+.breadcrumb .current { color: var(--color-text-secondary); font-weight: 500; }
+
+.topbar-actions { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
+.topbar-search {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: .4rem .9rem;
+  min-width: 240px;
+  color: var(--color-muted);
+}
+.topbar-search input { border: 0; background: transparent; outline: none; font-size: var(--fs-caption); color: var(--color-text); width: 100%; cursor: pointer; }
+.topbar-search { cursor: pointer; }
+.topbar-search-kbd {
+  font-size: 10px; color: var(--color-muted); flex: 0 0 auto;
+  border: 1px solid var(--color-border); border-radius: 4px;
+  padding: 1px 5px; background: var(--color-surface);
+}
+.topbar-icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid transparent; background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--header-muted, var(--color-text-secondary)); cursor: pointer; position: relative;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.topbar-icon-btn:hover { background: var(--header-hover, var(--color-surface-2)); color: var(--header-text, var(--color-text)); }
+.topbar-icon-btn .dot {
+  position: absolute; top: 6px; right: 7px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--color-danger); border: 2px solid var(--header-bg, var(--color-surface));
+}
+.topbar-icon-btn[disabled], .topbar-icon-btn.is-disabled { opacity: .45; cursor: not-allowed; }
+
+.topbar-divider { width: 1px; height: 22px; background: var(--header-border, var(--color-border)); }
+.topbar-username { font-size: var(--fs-caption); font-weight: 600; color: var(--header-text, inherit); }
+
+/* ---------- Page header ---------- */
+.page-header {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: .75rem; margin-bottom: .5rem;
+}
+.page-header .breadcrumb { margin-bottom: .25rem; }
+.page-header h1 { font-size: var(--fs-page-title); font-weight: 800; margin: 0; line-height: 1.3; }
+.page-header p { margin: .1rem 0 0; font-size: var(--fs-caption); color: var(--color-text-secondary); }
+.page-header--actions-only { justify-content: flex-end; margin-bottom: .5rem; }
+.page-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+}
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .9rem; margin-bottom: 1.25rem; }
+.kpi-card {
+  height: 92px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: .9rem 1rem;
+  display: flex; align-items: center; gap: .8rem;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop); }
+.kpi-card .kpi-icon {
+  width: 42px; height: 42px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  background: var(--color-primary-soft); color: var(--color-primary-text);
+}
+.kpi-card.kpi-success .kpi-icon { background: var(--color-success-soft); color: var(--color-success-text); }
+.kpi-card.kpi-warning .kpi-icon { background: var(--color-warning-soft); color: var(--color-warning-text); }
+.kpi-card.kpi-danger  .kpi-icon { background: var(--color-danger-soft); color: var(--color-danger-text); }
+.kpi-card.kpi-info    .kpi-icon { background: var(--color-info-soft); color: var(--color-info-text); }
+.kpi-card .kpi-body { min-width: 0; flex: 1; }
+.kpi-card .kpi-value { font-size: 1.5rem; font-weight: 800; line-height: 1.1; color: var(--color-text); }
+.kpi-card .kpi-value.is-text { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-card .kpi-label { font-size: var(--fs-caption); color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-card .kpi-trend { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 2px; margin-top: 2px; }
+.kpi-card .kpi-trend.up { color: var(--color-success-text); }
+.kpi-card .kpi-trend.down { color: var(--color-danger-text); }
+.kpi-card .kpi-sparkline { flex: 0 0 auto; opacity: .8; }
+
+/* ---------- Chart containers ---------- */
+.chart-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px; margin-bottom: 1.25rem; }
+/* --card-accent (optional company branding) draws a top strip on cards; unset = invisible.
+   Declared after every card's own box-shadow so it layers on top of them. */
+.card, .kpi-card, .chart-card { box-shadow: var(--shadow-card), inset 0 3px 0 var(--card-accent, transparent); }
+.kpi-card:hover { box-shadow: var(--shadow-pop), inset 0 3px 0 var(--card-accent, transparent); }
+.chart-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .9rem; }
+.chart-card-head h2 { font-size: var(--fs-section); }
+.chart-legend { display: flex; gap: .9rem; flex-wrap: wrap; font-size: var(--fs-caption); color: var(--color-text-secondary); }
+.chart-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: .35rem; }
+.chart-placeholder {
+  height: 220px; border-radius: var(--radius-md); border: 1px dashed var(--color-border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-muted); font-size: var(--fs-caption); background: var(--color-surface-2);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  height: var(--h-btn);
+  padding: 0 .9rem;
+  border-radius: var(--btn-radius, var(--radius-sm));
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  border: 1px solid transparent;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn-xs { height: 26px; padding: 0 .55rem; font-size: 11px; border-radius: var(--btn-radius, 6px); gap: .3rem; }
+.btn-sm { height: var(--h-btn-sm); padding: 0 .7rem; font-size: 12px; border-radius: var(--btn-radius, 8px); }
+.btn-lg { height: 40px; padding: 0 1.2rem; font-size: 14px; }
+
+/* Semantic buttons. Each variant publishes its tokens as --btn-*; the shared
+   rules below feed them into Bootstrap's own --bs-btn-* variables, so the base,
+   hover, active, focus and disabled states all follow the company branding
+   (light and dark) without a rule per state. */
+.btn-primary,   .btn-outline-primary   { --btn-c: var(--color-primary);   --btn-h: var(--color-primary-hover);   --btn-on: var(--text-on-primary);   --btn-on-h: var(--text-on-primary-hover);   --btn-t: var(--color-primary-text);   --btn-soft: var(--color-primary-soft);   --btn-rgb: var(--color-primary-rgb); }
+.btn-secondary                         { --btn-c: var(--color-secondary); --btn-h: var(--color-secondary-hover); --btn-on: var(--text-on-secondary); --btn-on-h: var(--text-on-secondary-hover); --btn-t: var(--color-secondary-text); --btn-soft: var(--color-secondary-soft); --btn-rgb: var(--color-secondary-rgb); }
+.btn-success,   .btn-outline-success   { --btn-c: var(--color-success);   --btn-h: var(--color-success-hover);   --btn-on: var(--text-on-success);   --btn-on-h: var(--text-on-success-hover);   --btn-t: var(--color-success-text);   --btn-soft: var(--color-success-soft);   --btn-rgb: var(--color-success-rgb); }
+.btn-warning,   .btn-outline-warning   { --btn-c: var(--color-warning);   --btn-h: var(--color-warning-hover);   --btn-on: var(--text-on-warning);   --btn-on-h: var(--text-on-warning-hover);   --btn-t: var(--color-warning-text);   --btn-soft: var(--color-warning-soft);   --btn-rgb: var(--color-warning-rgb); }
+.btn-danger,    .btn-outline-danger    { --btn-c: var(--color-danger);    --btn-h: var(--color-danger-hover);    --btn-on: var(--text-on-danger);    --btn-on-h: var(--text-on-danger-hover);    --btn-t: var(--color-danger-text);    --btn-soft: var(--color-danger-soft);    --btn-rgb: var(--color-danger-rgb); }
+.btn-info,      .btn-outline-info      { --btn-c: var(--color-info);      --btn-h: var(--color-info-hover);      --btn-on: var(--text-on-info);      --btn-on-h: var(--text-on-info-hover);      --btn-t: var(--color-info-text);      --btn-soft: var(--color-info-soft);      --btn-rgb: var(--color-info-rgb); }
+
+.btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-danger, .btn-info {
+  --bs-btn-color: var(--btn-on); --bs-btn-bg: var(--btn-c); --bs-btn-border-color: var(--btn-c);
+  --bs-btn-hover-color: var(--btn-on-h); --bs-btn-hover-bg: var(--btn-h); --bs-btn-hover-border-color: var(--btn-h);
+  --bs-btn-active-color: var(--btn-on-h); --bs-btn-active-bg: var(--btn-h); --bs-btn-active-border-color: var(--btn-h);
+  --bs-btn-disabled-color: var(--btn-on); --bs-btn-disabled-bg: var(--btn-c); --bs-btn-disabled-border-color: var(--btn-c);
+  --bs-btn-focus-shadow-rgb: var(--btn-rgb);
+  border-color: var(--bs-btn-border-color);
+}
+.btn-outline-primary, .btn-outline-success, .btn-outline-warning, .btn-outline-danger, .btn-outline-info {
+  --bs-btn-color: var(--btn-t); --bs-btn-bg: transparent; --bs-btn-border-color: var(--btn-c);
+  --bs-btn-hover-color: var(--btn-t); --bs-btn-hover-bg: var(--btn-soft); --bs-btn-hover-border-color: var(--btn-c);
+  --bs-btn-active-color: var(--btn-t); --bs-btn-active-bg: var(--btn-soft); --bs-btn-active-border-color: var(--btn-c);
+  --bs-btn-disabled-color: var(--btn-t); --bs-btn-disabled-bg: transparent; --bs-btn-disabled-border-color: var(--btn-c);
+  --bs-btn-focus-shadow-rgb: var(--btn-rgb);
+  border-color: var(--bs-btn-border-color);
+}
+/* outline-secondary is the app's neutral button, not a tint of the secondary color. */
+.btn-outline-secondary { background: var(--color-surface); border-color: var(--color-border); color: var(--color-text-secondary); }
+.btn-outline-secondary:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+.btn-ghost { background: transparent; border-color: transparent; color: var(--color-text-secondary); }
+.btn-ghost:hover { background: var(--color-surface-2); color: var(--color-text); }
+.btn-fit { width: fit-content; }
+
+.btn-icon { width: var(--h-btn); height: var(--h-btn); padding: 0; border-radius: var(--btn-radius, var(--radius-sm)); }
+.btn-icon.btn-xs { width: 26px; height: 26px; }
+.btn-icon.btn-sm { width: var(--h-btn-sm); height: var(--h-btn-sm); }
+
+.btn:disabled, .btn.disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn .spinner-border { width: .85em; height: .85em; border-width: .15em; }
+
+/* Row action buttons stay compact and unobtrusive */
+.row-actions { display: inline-flex; align-items: center; gap: .25rem; }
+.row-actions .btn-icon { width: 28px; height: 28px; color: var(--color-muted); background: transparent; border-color: transparent; }
+.row-actions .btn-icon:hover { background: var(--color-surface-2); color: var(--color-text); }
+.row-actions .btn-icon.text-danger:hover { background: var(--color-danger-soft); color: var(--color-danger-text); }
+
+/* ---------- Badges / status pills ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-weight: 600; font-size: var(--fs-caption);
+  padding: .28em .65em .28em .55em;
+  border-radius: var(--radius-pill);
+  line-height: 1.5;
+}
+.badge .icon { width: 12px; height: 12px; }
+.badge-primary { background: var(--color-primary-soft); color: var(--color-primary-text); }
+.badge-success { background: var(--color-success-soft); color: var(--color-success-text); }
+.badge-warning { background: var(--color-warning-soft); color: var(--color-warning-text); }
+.badge-danger  { background: var(--color-danger-soft); color: var(--color-danger-text); }
+.badge-info    { background: var(--color-info-soft); color: var(--color-info-text); }
+.badge-accent  { background: var(--color-accent-soft); color: var(--color-accent); }
+.badge-muted   { background: var(--color-surface-2); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+
+/* Several views (employees/_tab_login, _tab_organization, form.php,
+   attendance/my.php, attendance/shift_assignments/*) build badges with raw
+   Bootstrap 5.3 "subtle" utility classes instead of the .badge-* variants
+   above — those come straight from Bootstrap's own (non-dark-aware, non-
+   token) palette. `bg-purple-subtle` / `text-purple-emphasis` in particular
+   isn't a real Bootstrap class at all (Bootstrap has no "purple" theme
+   color), so those specific badges render with no background/text color
+   whatsoever today — this section both dark-mode-fixes the real Bootstrap
+   classes and fixes that one that was simply broken. */
+.badge.bg-success-subtle, .badge.text-bg-success { background: var(--color-success-soft) !important; color: var(--color-success-text) !important; }
+.badge.text-success-emphasis { color: var(--color-success-text) !important; }
+.badge.bg-danger-subtle, .badge.text-bg-danger { background: var(--color-danger-soft) !important; color: var(--color-danger-text) !important; }
+.badge.text-danger-emphasis { color: var(--color-danger-text) !important; }
+.badge.bg-warning-subtle, .badge.text-bg-warning { background: var(--color-warning-soft) !important; color: var(--color-warning-text) !important; }
+.badge.text-warning-emphasis { color: var(--color-warning-text) !important; }
+.badge.bg-info-subtle, .badge.text-bg-info { background: var(--color-info-soft) !important; color: var(--color-info-text) !important; }
+.badge.text-info-emphasis { color: var(--color-info-text) !important; }
+.badge.bg-primary-subtle, .badge.text-bg-primary { background: var(--color-primary-soft) !important; color: var(--color-primary-text) !important; }
+.badge.text-primary-emphasis { color: var(--color-primary-text) !important; }
+.badge.bg-secondary-subtle, .badge.text-bg-secondary { background: var(--color-surface-2) !important; color: var(--color-text-secondary) !important; border: 1px solid var(--color-border); }
+.badge.text-secondary-emphasis { color: var(--color-text-secondary) !important; }
+.badge.bg-purple-subtle, .badge.text-bg-purple { background: var(--color-primary-soft) !important; color: var(--color-primary-text) !important; }
+.badge.text-purple-emphasis { color: var(--color-primary-text) !important; }
+
+/* Department/branch chips distinct from status badges */
+.chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: 11px; font-weight: 600;
+  padding: .2em .55em;
+  border-radius: 6px;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ---------- Breadcrumb (page-header variant reuses .breadcrumb above) ---------- */
+
+/* ---------- Dropdown menu (Bootstrap dropdown, restyled) ---------- */
+.dropdown-menu {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  padding: .4rem;
+  font-size: var(--fs-caption);
+}
+.dropdown-item { border-radius: 8px; padding: .5rem .6rem; display: flex; align-items: center; gap: .55rem; color: var(--color-text); }
+.dropdown-item:hover, .dropdown-item:focus { background: var(--color-surface-2); color: var(--color-text); }
+.dropdown-item.text-danger:hover { background: var(--color-danger-soft); }
+.dropdown-item-text { padding: .5rem .6rem; }
+.dropdown-divider { border-color: var(--color-border); margin: .3rem 0; }
+
+/* ---------- User dropdown card ---------- */
+.user-menu-header { display: flex; align-items: center; gap: .6rem; padding: .5rem .6rem .7rem; border-bottom: 1px solid var(--color-border); margin-bottom: .3rem; }
+.user-menu-header .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary-text); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.user-menu-header .name { font-weight: 700; font-size: var(--fs-caption); color: var(--color-text); }
+.user-menu-header .email { font-size: 11px; color: var(--color-muted); }
+
+/* ---------- Notification panel ---------- */
+.notif-panel { width: 340px; max-height: 440px; overflow-y: auto; padding: 0; }
+.notif-panel-head { display: flex; align-items: center; justify-content: space-between; padding: .7rem .9rem; border-bottom: 1px solid var(--color-border); }
+.notif-panel-head h3 { font-size: var(--fs-body); }
+.notif-panel-head button { font-size: 11px; font-weight: 600; color: var(--color-primary-text); background: none; border: 0; }
+.notif-group-label { font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-muted); padding: .7rem .9rem .3rem; }
+.notif-item { display: flex; gap: .6rem; padding: .6rem .9rem; }
+.notif-item:hover { background: var(--color-surface-2); }
+.notif-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); margin-top: 6px; flex: 0 0 auto; }
+.notif-item.is-read .dot { background: var(--color-border); }
+.notif-item .body { min-width: 0; }
+.notif-item .title { font-size: var(--fs-caption); color: var(--color-text); font-weight: 600; }
+.notif-item .time { font-size: 11px; color: var(--color-muted); }
+
+/* A handful of views (employees/index, users/index, the 3 report-picker
+   landing pages) use Bootstrap's `.text-body` utility to keep link text from
+   turning purple. `.text-body` hardcodes Bootstrap's own light-mode-only
+   `--bs-body-color` (`!important`), which is never dark-aware — in dark mode
+   it renders near-black text that's only saved from invisibility where a
+   more specific child rule happens to override it (e.g. employees/index.php's
+   `.cell-identity .name`); users/index.php's employee-name link has no such
+   override and is genuinely unreadable in dark mode without this. */
+.text-body { color: var(--color-text) !important; }
+
+/* ---------- Alerts (Bootstrap .alert, restyled onto our tokens) ----------
+   Several forms (employees, users, payroll, leave, auth) use raw Bootstrap
+   .alert-* classes for inline validation/notice banners. Left alone, those
+   render with Bootstrap's own hardcoded light-mode colors — a "Bootstrap
+   look" island that also stays bright yellow/red in dark mode. */
+.alert {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: .75rem 1rem;
+  font-size: var(--fs-caption);
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+.alert-primary { background: var(--color-primary-soft); border-color: var(--color-primary-soft); color: var(--color-primary-text); }
+.alert-secondary { background: var(--color-secondary-soft); border-color: var(--color-secondary-soft); color: var(--color-secondary-text); }
+.alert-danger { background: var(--color-danger-soft); border-color: var(--color-danger-soft); color: var(--color-danger-text); }
+.alert-warning { background: var(--color-warning-soft); border-color: var(--color-warning-soft); color: var(--color-warning-text); }
+.alert-success { background: var(--color-success-soft); border-color: var(--color-success-soft); color: var(--color-success-text); }
+.alert-info { background: var(--color-info-soft); border-color: var(--color-info-soft); color: var(--color-info-text); }
+.alert .alert-link { font-weight: 700; text-decoration: underline; color: inherit; }
+
+/* ---------- Progress (Bootstrap .progress, restyled) ----------
+   Used by the password-strength meter in employees/_tab_login.php; Bootstrap's
+   own .progress/.progress-bar have a hardcoded light-grey track. */
+.progress { background: var(--color-surface-2); border-radius: var(--radius-pill); overflow: hidden; }
+.progress-bar { background: var(--color-primary); transition: width var(--dur-base) var(--ease), background var(--dur-base) var(--ease); }
+.progress-bar.bg-danger { background: var(--color-danger) !important; }
+.progress-bar.bg-warning { background: var(--color-warning) !important; }
+.progress-bar.bg-success { background: var(--color-success) !important; }
+.progress-bar.bg-info { background: var(--color-info) !important; }
+.progress-bar.bg-primary { background: var(--color-primary) !important; }
+
+/* ---------- Empty / error states ---------- */
+.empty-state, .error-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-secondary);
+}
+.empty-state.is-compact, .error-state.is-compact { padding: 0; }
+.empty-state .empty-icon, .error-state .error-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--color-surface-2); color: var(--color-muted);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto .9rem;
+}
+.empty-state .empty-icon .icon, .error-state .error-icon .icon { width: 24px; height: 24px; }
+.empty-state h3, .error-state h3 { font-size: var(--fs-body); margin-bottom: .25rem; color: var(--color-text); }
+.empty-state p, .error-state p { font-size: var(--fs-caption); margin-bottom: 1rem; }
+.error-state .error-icon { background: var(--color-danger-soft); color: var(--color-danger-text); }
+
+/* ---------- Modals ---------- */
+.modal-content { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: var(--shadow-pop); overflow: hidden; }
+.modal-header { border-bottom: 1px solid var(--color-border); padding: 1rem 1.25rem; box-shadow: inset 0 3px 0 var(--card-accent, var(--color-primary)); }
+.modal-header .btn-close:hover { opacity: 1; filter: none; background-color: var(--color-primary-soft); }
+.modal-header .modal-title { font-size: var(--fs-section); font-weight: 700; color: var(--color-text); }
+.modal-body { padding: 1.25rem; }
+.modal-footer { border-top: 1px solid var(--color-border); padding: .85rem 1.25rem; position: sticky; bottom: 0; background: var(--color-surface); }
+.modal.fade .modal-dialog { transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease); }
+
+/* ---------- Drawer / slide panel ---------- */
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(15, 17, 23, .45);
+  backdrop-filter: blur(2px);
+  z-index: 1050;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease);
+}
+.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 450px; max-width: 100vw;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+  z-index: 1051;
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--dur-base) var(--ease);
+}
+.drawer.open { transform: translateX(0); }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--color-border); flex: 0 0 auto; }
+.drawer-header h2 { font-size: var(--fs-section); }
+.drawer-body { padding: 1.25rem; overflow-y: auto; flex: 1 1 auto; }
+.drawer-footer { padding: .9rem 1.25rem; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; gap: .5rem; flex: 0 0 auto; position: sticky; bottom: 0; background: var(--color-surface); }
+
+/* Explicit size variants — default (no modifier) stays 450px for back-compat. */
+.drawer-sm { width: 360px; }
+.drawer-md { width: 480px; }
+.drawer-lg { width: 640px; }
+.drawer-fullscreen { width: 100vw; }
+@media (max-width: 576px) { .drawer, .drawer-sm, .drawer-md, .drawer-lg { width: 100vw; } }
+
+/* ---------- Command palette (global search, Ctrl+K) ---------- */
+.command-palette-backdrop {
+  position: fixed; inset: 0; background: rgba(15, 17, 23, .5);
+  backdrop-filter: blur(2px); z-index: 1060;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease);
+}
+.command-palette-backdrop.open { opacity: 1; pointer-events: auto; }
+.command-palette {
+  position: fixed; top: 12vh; left: 50%;
+  width: min(560px, calc(100vw - 2rem));
+  max-height: 60vh;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-pop);
+  z-index: 1061;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transform: translate(-50%, -8px) scale(.98);
+  transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+}
+.command-palette.open { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) scale(1); }
+.command-palette-input {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .9rem 1.1rem; border-bottom: 1px solid var(--color-border); flex: 0 0 auto;
+}
+.command-palette-input input { flex: 1; border: 0; outline: none; background: transparent; font-size: var(--fs-input); color: var(--color-text); }
+.command-palette-input kbd { font-size: 11px; color: var(--color-muted); border: 1px solid var(--color-border); border-radius: 4px; padding: 1px 6px; }
+.command-palette-results { overflow-y: auto; padding: .5rem; }
+.command-palette-group-label { font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-muted); padding: .6rem .6rem .3rem; }
+.command-palette-item {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  padding: .55rem .7rem; border-radius: var(--radius-md); color: var(--color-text); font-size: var(--fs-caption);
+}
+.command-palette-item:hover, .command-palette-item.is-active { background: var(--color-surface-2); color: var(--color-text); }
+.command-palette-item-label mark { background: var(--color-primary-soft); color: var(--color-primary-text); border-radius: 3px; padding: 0 1px; }
+.command-palette-item-type { font-size: 11px; color: var(--color-muted); flex: 0 0 auto; }
+
+/* ---------- Bulk-select toolbar ---------- */
+.bulk-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .6rem;
+  padding: .55rem .9rem;
+  margin-bottom: .6rem;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-soft);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  color: var(--color-primary-text);
+  font-weight: 600;
+}
+
+/* ---------- Density toggle ---------- */
+.density-toggle { display: inline-flex; gap: .2rem; padding: .2rem; background: var(--color-surface-2); border-radius: var(--radius-pill); margin-bottom: .6rem; }
+.density-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.density-btn:hover { color: var(--color-text); }
+.density-btn.is-active { background: var(--color-surface); color: var(--color-primary-text); box-shadow: var(--shadow-card); }
+
+/* ---------- Sidebar quick sections (favorites/recent) ---------- */
+.sidebar-quick-section .sidebar-group-label { display: flex; align-items: center; gap: .3rem; }
+
+/* ---------- Toast (existing markup, restyled) ---------- */
+.toast-stack { position: fixed; top: 1rem; right: 1rem; z-index: 1080; display: flex; flex-direction: column; gap: .5rem; width: min(360px, calc(100vw - 2rem)); }
+.toast-item {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .7rem .8rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-info);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--fs-caption);
+  color: var(--color-text);
+  opacity: 0; transform: translateX(12px);
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+.toast-item.show { opacity: 1; transform: translateX(0); }
+.toast-item.toast-success { border-left-color: var(--color-success); }
+.toast-item.toast-danger  { border-left-color: var(--color-danger); }
+.toast-item.toast-warning { border-left-color: var(--color-warning); }
+.toast-item.toast-info    { border-left-color: var(--color-info); }
+.toast-item .icon { margin-top: .1rem; }
+.toast-item.toast-success .icon { color: var(--color-success-text); }
+.toast-item.toast-danger .icon   { color: var(--color-danger-text); }
+.toast-item.toast-warning .icon  { color: var(--color-warning-text); }
+.toast-item.toast-info .icon     { color: var(--color-info-text); }
+.toast-item .toast-msg { flex: 1; }
+.toast-item .toast-close { border: 0; background: none; padding: 0; line-height: 1; color: var(--color-muted); cursor: pointer; font-size: .95rem; }
+.toast-item .toast-close:hover { color: var(--color-text-secondary); }
+.toast-item .toast-progress { position: absolute; left: 0; bottom: 0; height: 2px; background: currentColor; opacity: .35; animation: toast-progress linear forwards; }
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
+
+/* ---------- Confirmation dialog (existing #confirmModal, restyled) ---------- */
+#confirmModal .modal-body { color: var(--color-text-secondary); font-size: var(--fs-caption); }
+
+/* ---------- Loading / skeletons ---------- */
+.loading-overlay {
+  position: absolute; inset: 0;
+  background: rgba(255, 255, 255, .7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; border-radius: inherit;
+}
+:root[data-theme="dark"] .loading-overlay { background: rgba(15, 17, 23, .7); }
+.loading-host { position: relative; min-height: 3rem; }
+.skeleton-row td { padding: .7rem .9rem; }
+.skeleton-bar {
+  height: .7rem; border-radius: 4px;
+  background: linear-gradient(90deg, var(--color-surface-2) 25%, var(--color-border) 37%, var(--color-surface-2) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+.skeleton-card { border-radius: var(--radius-lg); height: 92px; }
+@keyframes skeleton-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-bar { animation: none; } }
+
+/* ---------- Progress bar (top of page) ---------- */
+.page-loading-bar {
+  position: fixed; top: 0; left: 0; height: 2px; width: 0;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
+  z-index: 2000; transition: width .3s var(--ease), opacity .2s var(--ease);
+}
+
+/* ---------- Punch screen ---------- */
+.punch-screen { max-width: 480px; margin: 0 auto; text-align: center; }
+.punch-clock { font-size: 2.4rem; font-weight: 800; line-height: 1; margin-bottom: .15rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.punch-date { color: var(--color-text-secondary); font-size: var(--fs-caption); margin-bottom: 1.5rem; }
+.punch-button {
+  width: 168px; height: 168px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-on-success);
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-hover));
+  box-shadow: 0 10px 30px rgba(var(--color-success-rgb), .35);
+  margin: 0 auto 1.5rem;
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: .4rem;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.punch-button:hover { transform: translateY(-2px); }
+.punch-button:active { transform: scale(.96); }
+.punch-button.is-out { color: var(--text-on-danger); background: linear-gradient(135deg, var(--color-danger), var(--color-danger-hover)); box-shadow: 0 10px 30px rgba(var(--color-danger-rgb), .35); }
+.punch-button:disabled { background: var(--color-muted); box-shadow: none; cursor: not-allowed; transform: none; }
+.punch-button .icon { width: 32px; height: 32px; }
+
+.status-chip-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.25rem; }
+.status-chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .8rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-caption);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+.status-chip .icon { width: 14px; height: 14px; }
+.status-chip.ok { color: var(--color-success-text); border-color: var(--color-success-soft); background: var(--color-success-soft); }
+.status-chip.warn { color: var(--color-warning-text); border-color: var(--color-warning-soft); background: var(--color-warning-soft); }
+.status-chip.bad { color: var(--color-danger-text); border-color: var(--color-danger-soft); background: var(--color-danger-soft); }
+
+.map-preview { width: 100%; height: 240px; border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+
+/* ---------- Profile page ---------- */
+.profile-header {
+  position: relative;
+  border-radius: var(--radius-lg);
+  z-index: 11; /* above the sticky .profile-tabs so the "More" dropdown isn't hidden behind it */
+  margin-bottom: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+.profile-cover {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  height: 110px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+}
+.profile-header-body {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.1rem;
+  padding: 0 1.5rem 1.25rem;
+  margin-top: -46px;
+  flex-wrap: wrap;
+}
+.profile-photo-edit { position: relative; flex: 0 0 auto; }
+.profile-photo-edit .employee-avatar-lg,
+.profile-photo-edit .employee-avatar-initials.employee-avatar-lg {
+  width: 96px; height: 96px; font-size: 1.9rem;
+  border: 4px solid var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+.profile-photo-edit label {
+  position: absolute; right: -2px; bottom: -2px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--color-primary); color: var(--text-on-primary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: 2px solid var(--color-surface);
+}
+.profile-meta { flex: 1 1 260px; min-width: 0; padding-bottom: .1rem; }
+.profile-meta h1 { font-size: var(--fs-section); display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.profile-meta .profile-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .45rem; }
+.profile-header .page-actions { padding-bottom: .1rem; }
+
+.profile-tabs {
+  display: flex; gap: .3rem; overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: .4rem;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: calc(var(--topbar-h) + .75rem);
+  z-index: 10;
+  -webkit-overflow-scrolling: touch;
+}
+.profile-tabs .nav-link {
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: .5rem .9rem;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.profile-tabs .nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+.profile-tabs .nav-link.active { color: var(--color-primary-text); background: var(--color-primary-soft); }
+.tab-pane-loading { padding: 2.5rem; text-align: center; color: var(--color-text-secondary); }
+.sub-entity-row:hover { background: var(--color-surface-2); }
+
+/* Bootstrap nav-pills used for ESS sub-navigation (leave/my/_tabs.php, my_payroll/_tabs.php) */
+.nav-pills { gap: .35rem; }
+.nav-pills .nav-link {
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  padding: .5rem 1rem;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.nav-pills .nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-pills .nav-link.active { background: var(--color-primary); color: var(--text-on-primary); }
+
+/* Bootstrap nav-tabs used inside forms (employees/form.php etc.) restyled to match */
+.nav-tabs { border-bottom: 1px solid var(--color-border); gap: .25rem; }
+.nav-tabs .nav-link {
+  border: none; border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  padding: .6rem .3rem;
+  margin-right: 1.1rem;
+}
+.nav-tabs .nav-link:hover { color: var(--color-text); border-color: transparent; border-bottom-color: var(--color-primary-soft); }
+.nav-tabs .nav-link.active { color: var(--color-primary-text); background: transparent; border-bottom-color: var(--color-primary); }
+
+/* ---------- Employee avatars (kept from previous system) ---------- */
+.employee-avatar, .employee-avatar-initials { border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.employee-avatar-initials { display: inline-flex; align-items: center; justify-content: center; background: var(--color-primary-soft); color: var(--color-primary-text); font-weight: 700; }
+.employee-avatar-sm, .employee-avatar-initials.employee-avatar-sm { width: 32px; height: 32px; font-size: .78rem; }
+.employee-avatar-lg, .employee-avatar-initials.employee-avatar-lg { width: 88px; height: 88px; font-size: 1.7rem; }
+
+/* ---------- Calendar ---------- */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.calendar-grid .calendar-dow {
+  background: var(--color-surface-2);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--color-text-secondary);
+  padding: .5rem 0;
+}
+.calendar-cell {
+  background: var(--color-surface);
+  min-height: 92px;
+  padding: .45rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+.calendar-cell.is-empty { background: var(--color-surface-2); }
+.calendar-cell .day-num { font-size: var(--fs-caption); font-weight: 600; color: var(--color-text-secondary); }
+.calendar-cell.is-today { background: var(--color-primary-soft); }
+.calendar-cell.is-today .day-num {
+  color: var(--text-on-primary); background: var(--color-primary);
+  width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.calendar-cell .calendar-event {
+  font-size: 11px; font-weight: 600;
+  padding: .2rem .4rem;
+  border-radius: 6px;
+  background: var(--color-info-soft); color: var(--color-info-text);
+  white-space: normal;
+  line-height: 1.3;
+}
+.calendar-grid-tall .calendar-cell { max-height: 130px; overflow-y: auto; }
+@media (max-width: 767px) {
+  .calendar-grid { grid-template-columns: repeat(7, minmax(38px, 1fr)); font-size: 11px; }
+  .calendar-cell { min-height: 56px; padding: .25rem; }
+}
+
+/* ---------- Auth (split layout) ---------- */
+.auth-shell { min-height: 100vh; display: flex; }
+.auth-brand-panel {
+  flex: 1 1 50%;
+  background: linear-gradient(155deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.auth-brand-panel::before {
+  content: '';
+  position: absolute; inset: -20%;
+  background: radial-gradient(circle at 25% 20%, color-mix(in srgb, var(--text-on-primary) 16%, transparent), transparent 55%),
+              radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--text-on-primary) 12%, transparent), transparent 50%);
+}
+.auth-brand-panel-inner { position: relative; max-width: 420px; color: var(--text-on-primary); }
+.auth-brand-mark {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--text-on-primary) 16%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.2rem; margin-bottom: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+.auth-brand-panel-inner h1 { font-size: 2rem; line-height: 1.25; margin-bottom: .9rem; }
+.auth-brand-panel-inner p { font-size: var(--fs-body); opacity: .88; line-height: 1.6; margin-bottom: 1.75rem; }
+.auth-brand-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .75rem; font-size: var(--fs-caption); font-weight: 500; }
+.auth-brand-points .icon { color: currentColor; opacity: .9; }
+
+.auth-form-panel {
+  flex: 1 1 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--color-bg);
+}
+.auth-card {
+  width: 100%; max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 2.25rem 2rem;
+}
+.auth-brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.4rem; }
+.auth-brand .mark {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: var(--text-on-primary); display: flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.auth-brand span { font-weight: 700; font-size: 1.05rem; }
+.auth-version { margin-top: 1.5rem; font-size: 11px; color: var(--color-muted); }
+
+@media (max-width: 900px) {
+  .auth-brand-panel { display: none; }
+  .auth-form-panel { flex: 1 1 100%; }
+}
+
+/* ---------- Bootstrap components on the brand tokens ----------
+   Stock Bootstrap paints these from its own compiled-in blue; pointing them at
+   our tokens makes them follow the company branding in light and dark. */
+.page-link { color: var(--color-primary-text); }
+.page-link:hover { color: var(--color-primary-text); background: var(--color-primary-soft); }
+.page-link:focus { box-shadow: var(--shadow-focus); }
+.page-item.active .page-link { background: var(--color-primary); border-color: var(--color-primary); color: var(--text-on-primary); }
+.dropdown-item.active, .dropdown-item:active { background: var(--color-primary); color: var(--text-on-primary); }
+.list-group-item.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--text-on-primary); }
+.text-primary   { color: var(--color-primary-text) !important; }
+.text-secondary { color: var(--color-secondary-text) !important; }
+.text-success   { color: var(--color-success-text) !important; }
+.text-warning   { color: var(--color-warning-text) !important; }
+.text-danger    { color: var(--color-danger-text) !important; }
+.text-info      { color: var(--color-info-text) !important; }
+.bg-primary   { color: var(--text-on-primary); }
+.bg-secondary { color: var(--text-on-secondary); }
+.bg-success   { color: var(--text-on-success); }
+.bg-warning   { color: var(--text-on-warning); }
+.bg-danger    { color: var(--text-on-danger); }
+.bg-info      { color: var(--text-on-info); }
+.border-primary { border-color: var(--color-primary) !important; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991px) {
+  .topbar-toggle { display: inline-flex; }
+  .content { padding: 1rem; }
+  .topbar-search { display: none; }
+  /* The off-canvas sidebar has no collapse state on mobile — the menu button is enough. */
+  .sidebar-collapse-btn { display: none; }
+}
+
+@media (max-width: 575px) {
+  .topbar { gap: .5rem; padding: 0 .75rem; }
+  .topbar-toggle { margin-right: .5rem; flex: 0 0 auto; }
+  .topbar-title { flex: 1 1 auto; }
+  .topbar-title h1 { font-size: 1rem; line-height: 1.25; }
+  .breadcrumb { display: none; }
+  .topbar-actions { gap: .25rem; }
+  .content { padding: .875rem; }
+}

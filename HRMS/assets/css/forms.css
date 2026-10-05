@@ -1,0 +1,253 @@
+/* ===========================================================
+   HRMS Platform — forms
+   Inputs, floating labels, switches, upload, Select2 theme.
+   =========================================================== */
+
+.form-label { font-size: var(--fs-caption); font-weight: 600; color: var(--color-text); margin-bottom: .35rem; display: inline-block; }
+.form-label .required { color: var(--color-danger-text); margin-left: 2px; }
+.form-text { font-size: 12px; color: var(--color-text-secondary); margin-top: .3rem; }
+
+.form-control, .form-select {
+  height: var(--h-input);
+  font-size: var(--fs-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0 .85rem;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+textarea.form-control { height: auto; min-height: 96px; padding: .65rem .85rem; line-height: 1.5; }
+.form-control:focus, .form-select:focus { border-color: var(--color-primary); box-shadow: var(--shadow-focus); }
+.form-control.is-invalid, .form-select.is-invalid { border-color: var(--color-danger); }
+.form-control.is-invalid:focus { box-shadow: 0 0 0 3px var(--color-danger-soft); }
+.form-control.is-valid { border-color: var(--color-success); }
+.valid-feedback { font-size: 12px; color: var(--color-success-text); margin-top: .3rem; }
+.invalid-feedback { font-size: 12px; color: var(--color-danger-text); margin-top: .3rem; }
+.form-control::placeholder { color: var(--color-muted); }
+
+.form-control-sm, .form-select-sm { height: var(--h-btn-sm); font-size: var(--fs-caption); border-radius: var(--radius-sm); padding: 0 .65rem; }
+
+/* ---- Section headings within forms ---- */
+.form-section-title {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--color-muted);
+  margin: 1.4rem 0 .7rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ---- Prefix / suffix icon slots ---- */
+.input-affix { position: relative; }
+.input-affix .form-control { padding-left: 2.4rem; }
+.input-affix.has-suffix .form-control { padding-right: 2.4rem; }
+.input-affix .affix { position: absolute; top: 50%; transform: translateY(-50%); color: var(--color-muted); display: flex; }
+.input-affix .affix-prefix { left: .85rem; }
+.input-affix .affix-suffix { right: .85rem; }
+.input-affix .affix-suffix.is-clickable { cursor: pointer; pointer-events: auto; }
+
+/* ---- Floating labels (wraps Bootstrap's .form-floating) ---- */
+.form-floating > .form-control,
+.form-floating > .form-select { height: 52px; padding: 1.35rem .85rem .35rem; }
+.form-floating > label { font-size: var(--fs-caption); color: var(--color-muted); padding: 0 .85rem; }
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label { color: var(--color-primary-text); }
+
+/* ---- Switches ---- */
+.form-switch .form-check-input {
+  width: 2.4em; height: 1.35em;
+  border-color: var(--color-border);
+  background-color: var(--color-surface-2);
+}
+.form-switch .form-check-input:checked { background-color: var(--color-primary); border-color: var(--color-primary); }
+.form-switch .form-check-input:focus { box-shadow: var(--shadow-focus); border-color: var(--color-primary); }
+
+/* ---- Checkbox / radio ---- */
+.form-check-input { background-color: var(--color-surface-2); border-color: var(--color-border); }
+.form-check-input:checked { background-color: var(--color-primary); border-color: var(--color-primary); }
+.form-check-input:focus { box-shadow: var(--shadow-focus); }
+.form-check-label { font-size: var(--fs-caption); color: var(--color-text); }
+
+/* ---- Upload dropzone ---- */
+.upload-zone {
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-2);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  cursor: pointer;
+}
+.upload-zone:hover, .upload-zone.is-dragover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.upload-zone .icon { width: 28px; height: 28px; color: var(--color-muted); margin-bottom: .5rem; }
+.upload-zone .upload-hint { font-size: 12px; color: var(--color-muted); margin-top: .2rem; }
+
+.upload-file-list { margin-top: .75rem; display: flex; flex-direction: column; gap: .4rem; }
+.upload-file-item {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem .7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--fs-caption);
+}
+.upload-file-item .file-icon { color: var(--color-primary-text); flex: 0 0 auto; }
+.upload-file-item .file-preview { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex: 0 0 auto; }
+.upload-file-item .file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upload-file-item .file-remove { color: var(--color-muted); cursor: pointer; flex: 0 0 auto; }
+.upload-file-item .file-remove:hover { color: var(--color-danger-text); }
+.upload-progress { height: 4px; border-radius: var(--radius-pill); background: var(--color-border); overflow: hidden; margin-top: .35rem; }
+.upload-progress > span { display: block; height: 100%; background: var(--color-primary); transition: width var(--dur-base) var(--ease); }
+
+/* ---- OTP input (placeholder pattern) ---- */
+.otp-input-group { display: flex; gap: .5rem; }
+.otp-input-group input {
+  width: 44px; height: 52px; text-align: center;
+  font-size: 1.2rem; font-weight: 700;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+}
+.otp-input-group input:focus { border-color: var(--color-primary); box-shadow: var(--shadow-focus); }
+
+/* ---- Select2 theme — premium, token-aligned, matches .form-control exactly ----
+   Select2's dropdown/search-box markup is appended to <body> (or a
+   modal/drawer, via dropdownParent) at open time, so it can't be assumed to
+   cascade down from .select2-container — every dropdown-flyout rule below
+   targets .select2-dropdown directly instead of scoping through the
+   container. Every color/background here is `!important`: the vendor
+   select2-bootstrap-5-theme package hardcodes fixed hex colors (#fff,
+   #212529, #e9ecef, #0d6efd…) rather than CSS variables, and its own
+   highlighted/selected-option selectors chain enough classes to outrank a
+   same-specificity override — losing that fight silently reverts an option
+   row to the vendor's light-only color in dark mode, which is exactly what
+   produced the "option text is the same color as the background" bug.
+   `!important` here is load-bearing, not stylistic — don't drop it. */
+.select2-container--bootstrap-5 .select2-selection {
+  min-height: var(--h-input);
+  border-color: var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: var(--fs-input);
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  display: flex; align-items: center;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.select2-container--bootstrap-5:hover .select2-selection { border-color: var(--color-muted); }
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+.select2-container--bootstrap-5 .select2-selection__rendered { font-size: var(--fs-caption); color: var(--color-text) !important; }
+.select2-container--bootstrap-5 .select2-selection__placeholder { color: var(--color-muted) !important; }
+.select2-container--bootstrap-5 .select2-selection__arrow { color: var(--color-muted); }
+.select2-container--bootstrap-5 .select2-selection__clear { color: var(--color-muted); }
+.select2-container--bootstrap-5 .select2-selection__clear:hover { color: var(--color-text); }
+
+/* Dropdown flyout */
+.select2-dropdown {
+  font-size: var(--fs-caption);
+  border-color: var(--color-border) !important;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-pop);
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+.select2-dropdown .select2-search {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--color-surface);
+  padding: .5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.select2-dropdown .select2-search__field {
+  border-radius: var(--radius-sm) !important;
+  background-color: var(--color-surface-2) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: .6rem center !important;
+  background-size: 13px 13px !important;
+  color: var(--color-text) !important;
+  border-color: transparent !important;
+  padding: .4rem .6rem .4rem 1.9rem !important;
+}
+.select2-dropdown .select2-search__field::placeholder { color: var(--color-muted) !important; opacity: 1; }
+.select2-dropdown .select2-search__field:focus { outline: none; box-shadow: var(--shadow-focus); }
+.select2-dropdown .select2-results { max-height: 260px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+.select2-dropdown .select2-results__options::-webkit-scrollbar { width: 6px; }
+.select2-dropdown .select2-results__options::-webkit-scrollbar-thumb { background: var(--color-primary-soft); border-radius: var(--radius-pill); }
+.select2-dropdown .select2-results__option {
+  color: var(--color-text) !important;
+  background-color: transparent !important;
+  padding: .5rem .75rem; border-radius: var(--radius-sm); margin: 1px .35rem; width: calc(100% - .7rem);
+}
+.select2-dropdown .select2-results__option--highlighted,
+.select2-dropdown .select2-results__option.select2-results__option--highlighted {
+  background-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+}
+.select2-dropdown .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted) {
+  background-color: var(--color-primary-soft) !important;
+  color: var(--color-primary-text) !important;
+}
+/* The CDN bootstrap-5 theme sets its own (larger) option font-size at higher specificity, so
+   state it with the theme's own selector chain. Also let the flyout be wider than a narrow
+   filter trigger (e.g. the "All managers" filter) so "Name (EMP000003)" doesn't wrap. */
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option {
+  font-size: var(--fs-caption); line-height: 1.35;
+}
+.select2-container--bootstrap-5 .select2-dropdown { min-width: 260px; }
+.select2-dropdown .select2-results__option[aria-disabled="true"] { color: var(--color-muted) !important; }
+.select2-dropdown .select2-results__message { color: var(--color-muted) !important; }
+
+/* Multi-select chips */
+.select2-container .select2-selection--multiple .select2-selection__rendered { gap: .3rem; padding: .3rem 0; }
+.select2-container .select2-selection--multiple .select2-selection__choice {
+  background: var(--color-primary-soft); color: var(--color-primary-text); border: none; border-radius: 6px;
+  padding: .15rem .5rem; font-weight: 600; display: inline-flex; align-items: center; gap: .3rem;
+}
+.select2-container .select2-selection--multiple .select2-selection__choice__remove { color: var(--color-primary-text); border: none; }
+.select2-container .select2-selection--multiple .select2-selection__choice__remove:hover { color: var(--color-danger-text); background: transparent; }
+
+/* Bulk Mark Attendance: wrap selected employees as compact chips instead of one per line.
+   Root cause: select2-bootstrap-5-theme sets `.select2-search__field { width:100% }` with no
+   constraint on its parent <li>, so the inline search box claims the whole row and pushes
+   every chip before it onto its own line. Give the search item a flexible-but-bounded size
+   instead, and let chips size to content (flex: 0 0 auto) so they pack left-to-right. */
+select.employee-chip-select + .select2-container .select2-selection--multiple .select2-selection__rendered {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; padding: .3rem .5rem; margin: 0;
+}
+select.employee-chip-select + .select2-container .select2-selection--multiple .select2-selection__choice {
+  flex: 0 0 auto; float: none; margin: 0; width: auto; max-width: 100%;
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.3; padding: .2rem .5rem;
+}
+select.employee-chip-select + .select2-container .select2-selection--multiple .select2-search--inline {
+  flex: 1 1 auto; min-width: 90px; margin: 0;
+}
+select.employee-chip-select + .select2-container .select2-selection--multiple .select2-search__field {
+  width: 100% !important; min-width: 90px; height: 1.6rem; margin: 0;
+}
+
+/* ---- Currency / phone affix presets ---- */
+.currency-input .affix-prefix { font-weight: 600; color: var(--color-text-secondary); }
+.phone-input-group { display: flex; gap: .5rem; }
+.phone-input-group .country-code { width: 88px; flex: 0 0 auto; }
+
+/* ---- Date / time inputs inherit .form-control; icon injected via .input-affix ---- */
+
+/* ---- Narrow form-card width presets (replace inline max-width:) ---- */
+.card-narrow-sm { max-width: 560px; }
+.card-narrow { max-width: 640px; }
+.card-narrow-lg { max-width: 720px; }
+
+/* ---- Fixed-width field presets (replace inline width:/min-width: on individual inputs) ---- */
+.field-w-xxs { width: 80px; }
+.field-w-xs { width: 100px; }
+.field-w-sm { min-width: 220px; }
+.field-w-md { min-width: 260px; }
+.field-w-90 { width: 90px; }
+.field-w-110 { width: 110px; }
+.field-w-check { width: 40px; }
