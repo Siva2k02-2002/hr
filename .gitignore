@@ -15,6 +15,8 @@
 *.log
 *.sql
 !HRMS/hrms_siva_manual_install.sql
+!HRMS/hrms_siva_manual_install.sql
+!superadmin/hrms_platform.schema.sql
 *.pem
 *.key
 *.p12
