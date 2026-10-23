@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <?php $accent = company_accent_rgba(); $accentSoft = company_accent_rgba(.12); ?>
 <style>
-  body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #1A1B2E; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #1A1B2E; }
   .header { width: 100%; border-bottom: 2px solid <?= $accent ?>; padding-bottom: 8px; margin-bottom: 10px; }
   .company { font-size: 16px; font-weight: bold; color: <?= $accent ?>; }
   .title { font-size: 12px; color: #5C5F77; margin-top: 2px; }
-  .avatar { width: 40px; height: 40px; border-radius: 20px; background: <?= $accentSoft ?>; color: <?= $accent ?>; text-align: center; line-height: 40px; font-weight: bold; font-size: 14px; }
+  .avatar { width: 40px; height: 40px; border-radius: 20px; background: <?= $accentSoft ?>; color: <?= $accent ?>; text-align: center; line-height: 34px; font-weight: bold; font-size: 13px; }
+  .avatar-img { width: 40px; height: 40px; }
   table.meta { width: 100%; margin-bottom: 10px; }
   table.meta td { padding: 2px 4px; vertical-align: top; }
   .label { color: #5C5F77; }
@@ -32,7 +33,7 @@
 
   <table class="meta">
     <tr>
-      <td width="40" rowspan="4"><div class="avatar"><?= esc(employee_initials($employee)) ?></div></td>
+      <td width="40" rowspan="4"><?php if (! empty($photoUri)): ?><img class="avatar-img" src="<?= $photoUri ?>"><?php else: ?><div class="avatar"><?= esc(employee_initials($employee)) ?></div><?php endif; ?></td>
       <td width="18%" class="label">Employee Name</td><td width="32%"><?= esc($employee['first_name'] . ' ' . $employee['last_name']) ?></td>
       <td width="18%" class="label">Employee Code</td><td><?= esc($employee['employee_code']) ?></td>
     </tr>

@@ -5,7 +5,7 @@
 -- Schema source: current HRMS schema (all 83 migrations, 68 tables).
 -- Contains: schema, system RBAC, master/default data, company settings,
 --           one initial company administrator (no usable password yet).
--- Contains NO other tenant's transactional/business data.
+-- Contains NOdd other tenant's transactional/business data.
 -- ============================================================================
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
@@ -1511,6 +1511,7 @@ CREATE TABLE IF NOT EXISTS `payroll_settings` (
   `pt_enabled` tinyint(1) NOT NULL DEFAULT 1,
   `tds_enabled` tinyint(1) NOT NULL DEFAULT 1,
   `payslip_prefix` varchar(20) NOT NULL DEFAULT 'PAY',
+  `payslip_format` enum('standard','half') NOT NULL DEFAULT 'standard',
   `lock_after_approval` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -1734,6 +1735,7 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES (81,'2026-09-10-090007','App\\Database\\Migrations\\AddEmployeeIdToAuditLogs','default','App',1789044776,9);
 INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES (82,'2026-09-28-100000','App\\Database\\Migrations\\AddBrandingColorsToCompanySettings','default','App',1790657888,10);
 INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES (83,'2026-09-29-160100','App\\Database\\Migrations\\AlterAttendanceHolidaysAddIsAnnual','default','App',1790680181,11);
+INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES (84,'2026-10-05-120000','App\\Database\\Migrations\\AddPayslipFormatToPayrollSettings','default','App',1791200000,12);
 
 -- ----------------------------------------------------------------------------
 -- 3. RBAC: permission catalog, 4 system roles, role grants (fixed system IDs preserved)

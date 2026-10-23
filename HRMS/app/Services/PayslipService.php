@@ -79,7 +79,11 @@ class PayslipService
         $deductions  = json_decode((string) $item['deductions_breakdown'], true) ?: [];
         $adjustments = (new PayrollAdjustmentModel($db))->forRunItem($runItemId);
 
-        $html = view('payroll/payslips/_pdf', [
+        $format = ($settings['payslip_format'] ?? 'standard') === 'half' ? 'half' : 'standard';
+        $photo  = (new EmployeePhotoService())->absolutePathFor($employee);
+
+        $html = view($format === 'half' ? 'payroll/payslips/_pdf_half' : 'payroll/payslips/_pdf', [
+            'photoUri'    => $this->imageDataUri($photo),
             'employee'    => $employee,
             'bank'        => $bank,
             'item'        => $item,
@@ -98,6 +102,25 @@ class PayslipService
         $dompdf->render();
 
         return $dompdf->output();
+    }
+
+    /** Re-encodes the employee photo as a PNG data URI (Dompdf has remote fetching off); null falls back to initials. */
+    private function imageDataUri(?string $path): ?string
+    {
+        if (! $path || ! is_file($path)) {
+            return null;
+        }
+        $img = @imagecreatefromstring((string) file_get_contents($path));
+        if (! $img) {
+            return null;
+        }
+        imagesavealpha($img, true);
+        ob_start();
+        imagepng($img);
+        $png = ob_get_clean();
+        imagedestroy($img);
+
+        return 'data:image/png;base64,' . base64_encode($png);
     }
 
     public function recordDownload(int $payslipId): void

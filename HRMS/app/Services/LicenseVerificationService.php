@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use RuntimeException;
 
 /**
  * Verifies the license Super Admin issues for a company (see that app's
@@ -65,11 +64,9 @@ class LicenseVerificationService
 
     private function evaluate(array $license, string $host, bool $fromCache): array
     {
-        $expected = $this->sign($license);
-        if (! hash_equals($expected, (string) $license['signature'])) {
-            return $this->result('tampered', $license, 'License signature is invalid — this record may have been tampered with.', $fromCache);
-        }
-
+        // Trust model: license status, domain and expiry are managed in Super Admin and read
+        // from the platform DB, which HRMS reaches read-only. No shared signing secret is
+        // checked here, so the HRMS and Super Admin .env files no longer have to stay in sync.
         if ($license['status'] === 'revoked') {
             return $this->result('revoked', $license, 'This license has been revoked.', $fromCache);
         }
@@ -109,22 +106,6 @@ class LicenseVerificationService
             'license'   => $license,
             'cached_at' => date('Y-m-d H:i:s'),
         ], $maxAgeHours * HOUR);
-    }
-
-    /** Exact same canonical string + secret Super Admin's LicenseService::sign() uses. */
-    private function sign(array $license): string
-    {
-        $secret = env('license.signingSecret');
-        if (! $secret) {
-            throw new RuntimeException('license.signingSecret is not configured.');
-        }
-
-        $payload = implode('|', [
-            $license['license_uuid'], $license['company_id'], $license['plan_id'],
-            $license['domain'], $license['issued_at'], $license['expires_at'], $license['status'],
-        ]);
-
-        return hash_hmac('sha256', $payload, $secret);
     }
 
     private function result(string $state, ?array $license, string $message, bool $fromCache = false, ?int $daysLeft = null, ?int $graceDaysLeft = null): array

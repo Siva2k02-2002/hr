@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <?php $accentSoft = company_accent_rgba(.12); ?>
 <style>
-  body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #1A1B2E; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #1A1B2E; }
   h1 { font-size: 14px; margin: 0 0 4px; }
   p { margin: 0 0 12px; color: #5C5F77; }
   table { width: 100%; border-collapse: collapse; }

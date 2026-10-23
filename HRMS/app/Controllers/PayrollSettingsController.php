@@ -46,7 +46,8 @@ class PayrollSettingsController extends BaseController
             'pt_enabled'                 => ! empty($post['pt_enabled']) ? 1 : 0,
             'tds_enabled'                => ! empty($post['tds_enabled']) ? 1 : 0,
             'payslip_prefix'             => (string) ($post['payslip_prefix'] ?? 'PAY'),
-            'lock_after_approval'       => ! empty($post['lock_after_approval']) ? 1 : 0,
+            'payslip_format'             => ($post['payslip_format'] ?? 'standard') === 'half' ? 'half' : 'standard',
+            'lock_after_approval'       =>! empty($post['lock_after_approval']) ? 1 : 0,
         ]);
 
         return redirect()->to(site_url('payroll/settings'))->with('success', 'Payroll settings updated.');

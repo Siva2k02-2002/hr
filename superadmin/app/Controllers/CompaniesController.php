@@ -82,12 +82,18 @@ class CompaniesController extends BaseController
             'contact_email'  => 'permit_empty|valid_email',
         ];
 
-        if (! $this->validate($rules)) {
+        $valid  = $this->validate($rules);
+        $errors = $valid ? [] : $this->validator->getErrors();
+        if ($valid && ($rangeError = \App\Services\SubscriptionService::dateRangeError((string) $this->request->getPost('starts_at'), (string) $this->request->getPost('expires_at')))) {
+            $errors['expires_at'] = $rangeError;
+        }
+
+        if ($errors !== []) {
             return view('companies/form', [
                 'title'   => 'Add company',
                 'plans'   => (new PlanModel())->where('is_active', 1)->findAll(),
                 'company' => null,
-                'errors'  => $this->validator->getErrors(),
+                'errors'  => $errors,
             ]);
         }
 

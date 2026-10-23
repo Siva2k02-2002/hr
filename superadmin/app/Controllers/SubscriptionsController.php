@@ -8,6 +8,7 @@ use App\Models\SubscriptionHistoryModel;
 use App\Models\SubscriptionModel;
 use App\Services\SubscriptionService;
 use CodeIgniter\Exceptions\PageNotFoundException;
+use RuntimeException;
 
 class SubscriptionsController extends BaseController
 {
@@ -57,29 +58,44 @@ class SubscriptionsController extends BaseController
             'status'     => 'required|in_list[trial,active,expiring,expired,suspended,cancelled]',
         ];
 
-        if (! $this->validate($rules)) {
+        $valid  = $this->validate($rules);
+        $errors = $valid ? [] : $this->validator->getErrors();
+        if ($valid && ($rangeError = SubscriptionService::dateRangeError((string) $this->request->getPost('starts_at'), (string) $this->request->getPost('expires_at')))) {
+            $errors['expires_at'] = $rangeError;
+        }
+
+        $override = $this->request->getPost('employee_limit_override');
+        if ($valid && $override !== null && $override !== '' && (! ctype_digit((string) $override) || (int) $override < 1)) {
+            $errors['employee_limit_override'] = 'Employee limit override must be a whole number of at least 1.';
+        }
+
+        if ($errors === []) {
+            try {
+                $id = (new SubscriptionService())->create([
+                    'company_id'              => (int) $this->request->getPost('company_id'),
+                    'plan_id'                 => (int) $this->request->getPost('plan_id'),
+                    'starts_at'               => $this->request->getPost('starts_at'),
+                    'expires_at'              => $this->request->getPost('expires_at'),
+                    'employee_limit_override' => $override !== '' ? (int) $override : null,
+                    'status'                  => $this->request->getPost('status'),
+                    'remarks'                 => $this->request->getPost('remarks'),
+                    'created_by'              => $this->currentUserId(),
+                ]);
+            } catch (RuntimeException $e) {
+                $errors['company_id'] = $e->getMessage();
+            }
+        }
+
+        if ($errors !== []) {
             return view('subscriptions/form', [
                 'title'     => 'New subscription',
                 'subscription' => null,
                 'companies' => (new CompanyModel())->select('id, name')->findAll(),
                 'plans'     => (new PlanModel())->where('is_active', 1)->findAll(),
                 'preselectCompany' => (int) $this->request->getPost('company_id'),
-                'errors'    => $this->validator->getErrors(),
+                'errors'    => $errors,
             ]);
         }
-
-        $override = $this->request->getPost('employee_limit_override');
-
-        $id = (new SubscriptionService())->create([
-            'company_id'              => (int) $this->request->getPost('company_id'),
-            'plan_id'                 => (int) $this->request->getPost('plan_id'),
-            'starts_at'               => $this->request->getPost('starts_at'),
-            'expires_at'              => $this->request->getPost('expires_at'),
-            'employee_limit_override' => $override !== '' ? (int) $override : null,
-            'status'                  => $this->request->getPost('status'),
-            'remarks'                 => $this->request->getPost('remarks'),
-            'created_by'              => $this->currentUserId(),
-        ]);
 
         return redirect()->to(site_url('subscriptions/' . $id . '/history'))->with('success', 'Subscription created.');
     }
@@ -108,11 +124,15 @@ class SubscriptionsController extends BaseController
 
         $override = $this->request->getPost('employee_limit_override');
 
-        (new SubscriptionService())->changePlan(
-            (int) $id,
-            (int) $this->request->getPost('plan_id'),
-            $override !== '' ? (int) $override : null
-        );
+        try {
+            (new SubscriptionService())->changePlan(
+                (int) $id,
+                (int) $this->request->getPost('plan_id'),
+                $override !== '' ? (int) $override : null
+            );
+        } catch (RuntimeException $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()->to(site_url('subscriptions/' . $id . '/history'))->with('success', 'Subscription updated.');
     }
@@ -124,21 +144,33 @@ class SubscriptionsController extends BaseController
             return redirect()->back()->with('error', 'A new expiry date is required.');
         }
 
-        (new SubscriptionService())->extend((int) $id, $newExpiry);
+        try {
+            (new SubscriptionService())->extend((int) $id, $newExpiry);
+        } catch (RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return redirect()->to(site_url('subscriptions/' . $id . '/history'))->with('success', 'Subscription extended.');
     }
 
     public function suspend($id)
     {
-        (new SubscriptionService())->changeStatus((int) $id, 'suspended', $this->request->getPost('remarks'));
+        try {
+            (new SubscriptionService())->changeStatus((int) $id, 'suspended', $this->request->getPost('remarks'));
+        } catch (RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return redirect()->to(site_url('subscriptions/' . $id . '/history'))->with('success', 'Subscription suspended.');
     }
 
     public function cancel($id)
     {
-        (new SubscriptionService())->changeStatus((int) $id, 'cancelled', $this->request->getPost('remarks'));
+        try {
+            (new SubscriptionService())->changeStatus((int) $id, 'cancelled', $this->request->getPost('remarks'));
+        } catch (RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return redirect()->to(site_url('subscriptions/' . $id . '/history'))->with('success', 'Subscription cancelled.');
     }

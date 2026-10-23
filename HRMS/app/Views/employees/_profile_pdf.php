@@ -67,7 +67,7 @@ $pairs = static function (array $items): string {
 <title>Employee Profile - <?= esc($fullName) ?></title>
 <style>
   @page { margin: 28px 34px 50px 34px; }
-  body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5px; color: #1A1B2E; line-height: 1.4; }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 9.5px; color: #1A1B2E; line-height: 1.4; }
   table { width: 100%; border-collapse: collapse; }
   .head td { vertical-align: middle; }
   .company { font-size: 15px; font-weight: bold; color: <?= $accent ?>; }

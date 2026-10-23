@@ -37,7 +37,7 @@ class TenantResolver implements FilterInterface
             ->select('
                 c.id as company_id, c.code, c.name, c.status as company_status, c.provisioning_status,
                 cdc.db_host, cdc.db_port, cdc.db_name, cdc.db_username, cdc.db_password_enc, cdc.status as conn_status,
-                s.status as sub_status, s.expires_at
+                s.status as sub_status, s.expires_at, s.company_id as sub_company_id
             ')
             ->join('companies c', 'c.id = cd.company_id')
             ->join('company_database_connections cdc', 'cdc.company_id = c.id', 'left')
@@ -63,12 +63,14 @@ class TenantResolver implements FilterInterface
             return $this->deny('This company account is no longer active.', 403);
         }
 
-        if (! $row['sub_status'] || in_array($row['sub_status'], ['suspended', 'cancelled'], true)) {
-            return $this->deny('This company\'s subscription is not active. Contact your administrator.', 403);
-        }
+        $denial = self::subscriptionDenial($row, date('Y-m-d'));
+        if ($denial !== null) {
+            log_message('warning', 'Tenant {code} denied: {why} (sub_status={status}, expires_at={exp}, sub_company_id={sc}, company_id={cid})', [
+                'code' => $row['code'], 'why' => $denial['reason'], 'status' => $row['sub_status'] ?? 'NULL',
+                'exp' => $row['expires_at'] ?? 'NULL', 'sc' => $row['sub_company_id'] ?? 'NULL', 'cid' => $row['company_id'],
+            ]);
 
-        if ($row['expires_at'] !== null && $row['expires_at'] < date('Y-m-d')) {
-            return $this->deny('This company\'s subscription has expired. Contact your administrator.', 403);
+            return $this->deny($denial['message'], 403);
         }
 
         if (! $row['db_name'] || $row['conn_status'] !== 'provisioned') {
@@ -127,6 +129,36 @@ class TenantResolver implements FilterInterface
         }
 
         return $this->checkLicense((int) $row['company_id'], $row['code'], $host, $db);
+    }
+
+    /**
+     * Pure subscription gate. Returns null when access is allowed, else
+     * ['reason' => ..., 'message' => ...]. `trial`/`active`/`expiring` are allowed;
+     * a subscription that doesn't exist, belongs to another company, or is
+     * suspended/cancelled/expired is rejected. expires_at is inclusive: the whole
+     * expiry day is still valid.
+     */
+    public static function subscriptionDenial(array $row, string $today): ?array
+    {
+        $notActive = "This company's subscription is not active. Contact your administrator.";
+
+        if (empty($row['sub_status'])) {
+            return ['reason' => 'no_subscription', 'message' => $notActive];
+        }
+
+        if (isset($row['sub_company_id']) && (int) $row['sub_company_id'] !== (int) $row['company_id']) {
+            return ['reason' => 'subscription_company_mismatch', 'message' => $notActive];
+        }
+
+        if (in_array($row['sub_status'], ['suspended', 'cancelled'], true)) {
+            return ['reason' => 'status_' . $row['sub_status'], 'message' => $notActive];
+        }
+
+        if ($row['sub_status'] === 'expired' || ($row['expires_at'] !== null && $row['expires_at'] < $today)) {
+            return ['reason' => 'expired', 'message' => "This company's subscription has expired. Contact your administrator."];
+        }
+
+        return null;
     }
 
     /**

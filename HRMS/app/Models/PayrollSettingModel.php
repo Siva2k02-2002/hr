@@ -15,7 +15,7 @@ class PayrollSettingModel extends Model
         'payroll_start_day', 'payroll_end_day', 'salary_payment_day', 'financial_year_start_month', 'currency',
         'working_days_basis', 'fixed_working_days', 'overtime_enabled', 'overtime_multiplier', 'overtime_rate_basis',
         'lop_enabled', 'lop_deduction_basis', 'pf_enabled', 'esi_enabled', 'pt_enabled', 'tds_enabled',
-        'payslip_prefix', 'lock_after_approval',
+        'payslip_prefix', 'payslip_format', 'lock_after_approval',
     ];
 
     public function current(): array

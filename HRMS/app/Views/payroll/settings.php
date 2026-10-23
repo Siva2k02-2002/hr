@@ -49,6 +49,25 @@
       </div>
 
       <div class="col-md-12">
+        <label class="form-label d-block">Payslip PDF format <small class="text-muted">(enable one)</small></label>
+        <?php $payslipFormat = $settings['payslip_format'] ?? 'standard'; ?>
+        <?php foreach (['standard' => 'Standard (Full A4)', 'half' => 'Half A4 (compact)'] as $value => $label): ?>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input payslip-format-check" type="checkbox" name="payslip_format" value="<?= $value ?>" id="payslip_format_<?= $value ?>" <?= $payslipFormat === $value ? 'checked' : '' ?>>
+            <label class="form-check-label" for="payslip_format_<?= $value ?>"><?= $label ?></label>
+          </div>
+        <?php endforeach; ?>
+        <script>
+          document.querySelectorAll('.payslip-format-check').forEach(function (box) {
+            box.addEventListener('change', function () {
+              if (!box.checked) { box.checked = true; return; } // one option must stay enabled
+              document.querySelectorAll('.payslip-format-check').forEach(function (other) { if (other !== box) other.checked = false; });
+            });
+          });
+        </script>
+      </div>
+
+      <div class="col-md-12">
         <?php foreach (['overtime_enabled' => 'Overtime enabled', 'lop_enabled' => 'LOP enabled', 'pf_enabled' => 'PF enabled', 'esi_enabled' => 'ESI enabled', 'pt_enabled' => 'PT enabled', 'tds_enabled' => 'TDS enabled', 'lock_after_approval' => 'Lock payroll after approval'] as $field => $label): ?>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" name="<?= $field ?>" value="1" id="<?= $field ?>" <?= $settings[$field] ? 'checked' : '' ?>>
