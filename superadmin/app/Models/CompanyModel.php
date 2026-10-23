@@ -45,13 +45,59 @@ class CompanyModel extends Model
         return $row['domain'] ?? null;
     }
 
-    public function counts(): array
+    /**
+     * Joins each company to its CURRENT subscription (companies.current_subscription_id -
+     * the same pointer TenantResolver follows), and only if that subscription really
+     * belongs to the company. A company with a missing/foreign pointer simply gets no row.
+     */
+    public function withCurrentSubscription()
     {
-        $base = $this->builder()->select('status, COUNT(*) as total')->groupBy('status')->get()->getResultArray();
+        return $this->join('subscriptions cs', 'cs.id = companies.current_subscription_id AND cs.company_id = companies.id', 'left');
+    }
 
-        $counts = ['trial' => 0, 'active' => 0, 'expiring' => 0, 'expired' => 0, 'suspended' => 0, 'cancelled' => 0];
-        foreach ($base as $row) {
-            $counts[$row['status']] = (int) $row['total'];
+    /**
+     * The one definition of a company's subscription state, used by the dashboard counts
+     * and the Companies list status filter (requires withCurrentSubscription()):
+     *   none       - no valid current subscription
+     *   suspended / cancelled - as recorded
+     *   expired    - status 'expired', or expires_at before today (expiry day itself is still valid,
+     *                the same rule as TenantResolver: expires_at < today is denied)
+     *   scheduled  - start date still in the future
+     *   trial / active / expiring - as recorded, and in date
+     * $today is a Y-m-d string so every comparison uses the application's date, not the DB clock.
+     */
+    public function effectiveStatusSql(string $today): string
+    {
+        $t = $this->db->escape($today);
+
+        return "CASE
+            WHEN cs.id IS NULL THEN 'none'
+            WHEN cs.status IN ('suspended', 'cancelled') THEN cs.status
+            WHEN cs.status = 'expired' OR cs.expires_at < {$t} THEN 'expired'
+            WHEN cs.starts_at > {$t} THEN 'scheduled'
+            ELSE cs.status
+        END";
+    }
+
+    public function whereEffectiveStatus(string $status, string $today)
+    {
+        return $this->where($this->effectiveStatusSql($today) . ' = ' . $this->db->escape($status), null, false);
+    }
+
+    public function counts(?string $today = null): array
+    {
+        $today = $today ?? date('Y-m-d');
+        $expr  = $this->effectiveStatusSql($today);
+
+        $rows = $this->withCurrentSubscription()
+            ->select("{$expr} AS effective_status, COUNT(*) AS total", false)
+            ->where('companies.deleted_at', null)
+            ->groupBy('effective_status')
+            ->get()->getResultArray();
+
+        $counts = ['trial' => 0, 'active' => 0, 'expiring' => 0, 'expired' => 0, 'suspended' => 0, 'cancelled' => 0, 'scheduled' => 0, 'none' => 0];
+        foreach ($rows as $row) {
+            $counts[$row['effective_status']] = (int) $row['total'];
         }
 
         return $counts;

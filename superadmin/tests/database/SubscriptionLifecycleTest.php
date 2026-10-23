@@ -172,13 +172,112 @@ final class SubscriptionLifecycleTest extends CIUnitTestCase
         $this->assertSame('trial', $this->row('subscriptions', $id)['status']);
     }
 
-    public function testExtendSuspendedSubscriptionRestoresAccess(): void
+    public function testExtendSuspendedSubscriptionActivatesSubscriptionButNotSuspendedCompany(): void
     {
         $c  = $this->company('alpha');
-        $id = $this->sub($c, ['status' => 'suspended']);
+        $id = $this->sub($c, ['status' => 'suspended']);   // company is now 'suspended' too
         $this->svc->extend($id, $this->future(40));
 
+        $this->assertSame('active', $this->row('subscriptions', $id)['status']);
+        $this->assertSame('suspended', $this->row('companies', $c)['status'], 'only Activate company may lift a suspension');
+    }
+
+    public function testExpiredCompanyIsRestoredByRenewal(): void
+    {
+        $c  = $this->company('alpha');
+        $id = $this->sub($c, ['starts_at' => '2026-01-01', 'expires_at' => '2026-01-31', 'status' => 'expired']);
+        $this->assertSame('expired', $this->row('companies', $c)['status']);
+
+        $this->svc->extend($id, $this->future(30));
+
         $this->assertSame('active', $this->row('companies', $c)['status']);
+    }
+
+    public function testSuspensionSurvivesRenewalAndPlanChange(): void
+    {
+        $c  = $this->company('alpha');
+        $id = $this->sub($c, ['status' => 'active']);
+        (new \App\Services\CompanyService())->setStatus($c, 'suspended');
+
+        $this->svc->extend($id, $this->future(60));
+        $this->assertSame('suspended', $this->row('companies', $c)['status']);
+
+        $this->svc->changePlan($id, 3, null);
+        $co = $this->row('companies', $c);
+        $this->assertSame('suspended', $co['status']);
+        $this->assertSame(3, (int) $co['plan_id']);          // plan/limit still sync
+        $this->assertSame(500, (int) $co['employee_limit']);
+    }
+
+    public function testNewSubscriptionDoesNotLiftSuspension(): void
+    {
+        $c = $this->company('alpha');
+        $this->sub($c, ['status' => 'active']);
+        (new \App\Services\CompanyService())->setStatus($c, 'suspended');
+
+        $this->sub($c, ['plan_id' => 2, 'status' => 'trial']);
+
+        $this->assertSame('suspended', $this->row('companies', $c)['status']);
+    }
+
+    public function testExplicitActivationLiftsSuspensionToTheSubscriptionState(): void
+    {
+        $c = $this->company('alpha');
+        $this->sub($c, ['status' => 'trial']);
+        $company = new \App\Services\CompanyService();
+        $company->setStatus($c, 'suspended');
+
+        $company->activate($c);
+
+        $this->assertSame('trial', $this->row('companies', $c)['status']);
+    }
+
+    public function testActivateWithoutUsableSubscriptionFallsBackToActive(): void
+    {
+        $c = $this->company('alpha');
+        (new \App\Services\CompanyService())->setStatus($c, 'suspended');
+        (new \App\Services\CompanyService())->activate($c);
+
+        $this->assertSame('active', $this->row('companies', $c)['status']);
+    }
+
+    public function testCancellingSubscriptionEscalatesSuspendedCompanyToCancelled(): void
+    {
+        $c  = $this->company('alpha');
+        $id = $this->sub($c, ['status' => 'active']);
+        (new \App\Services\CompanyService())->setStatus($c, 'suspended');
+
+        $this->svc->changeStatus($id, 'cancelled');
+
+        $this->assertSame('cancelled', $this->row('companies', $c)['status']);
+    }
+
+    public function testCancelledCompanyStaysCancelledAfterRenewal(): void
+    {
+        $c  = $this->company('alpha');
+        $id = $this->sub($c, ['status' => 'active']);
+        (new \App\Services\CompanyService())->setStatus($c, 'cancelled');
+        $this->svc->extend($id, $this->future(60));
+
+        $this->assertSame('cancelled', $this->row('companies', $c)['status']);
+    }
+
+    public function testSubscriptionRenewalAndLicenseRenewalAreIndependent(): void
+    {
+        $c   = $this->company('alpha');
+        $id  = $this->sub($c);
+        $lic = new \App\Services\LicenseService();
+        $lic->generate($c, 1, $this->future(10), 1);
+
+        // Renewing only the license does not touch the subscription.
+        $before = $this->row('subscriptions', $id);
+        $lic->renew($c, $this->future(200), 1);
+        $this->assertSame($before['expires_at'], $this->row('subscriptions', $id)['expires_at']);
+
+        // Renewing the subscription issues a fresh license row but never edits older ones.
+        $licenseRows = $this->db->table('licenses')->where('company_id', $c)->countAllResults();
+        $this->svc->extend($id, $this->future(90));
+        $this->assertSame($licenseRows + 1, $this->db->table('licenses')->where('company_id', $c)->countAllResults());
     }
 
     public function testExtendCancelledSubscriptionStaysCancelled(): void

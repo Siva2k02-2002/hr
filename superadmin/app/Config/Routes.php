@@ -31,6 +31,8 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
     $routes->post('companies/(:num)/database', 'CompaniesController::saveDatabaseConnection/$1', ['filter' => 'permission:company.create']);
     $routes->get('companies/(:num)/provisioning-status', 'CompaniesController::provisioningStatus/$1', ['filter' => 'permission:company.create']);
     $routes->get('companies/(:num)/database', 'CompaniesController::database/$1', ['filter' => 'permission:company.view']);
+    $routes->get('companies/(:num)/admin-login', 'CompaniesController::adminLogin/$1', ['filter' => 'permission:company.admin_login']);
+    $routes->post('companies/(:num)/admin-login', 'CompaniesController::updateAdminLogin/$1', ['filter' => 'permission:company.admin_login']);
     $routes->post('companies/(:num)/license/renew', 'CompaniesController::renewLicense/$1', ['filter' => 'permission:company.edit']);
     $routes->post('companies/(:num)/license/revoke', 'CompaniesController::revokeLicense/$1', ['filter' => 'permission:company.suspend']);
 

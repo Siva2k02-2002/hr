@@ -26,6 +26,9 @@
     <?php if (can('company.settings')): ?>
       <a href="<?= site_url('companies/' . $company['id'] . '/settings') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-sliders"></i> Settings</a>
     <?php endif; ?>
+    <?php if (can('company.admin_login') && $company['provisioning_status'] === 'ready'): ?>
+      <a href="<?= site_url('companies/' . $company['id'] . '/admin-login') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-key"></i> Change Admin Login</a>
+    <?php endif; ?>
     <?php if (can('subscription.view')): ?>
       <a href="<?= site_url('subscriptions?company_id=' . $company['id']) ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-repeat"></i> Subscriptions</a>
     <?php endif; ?>

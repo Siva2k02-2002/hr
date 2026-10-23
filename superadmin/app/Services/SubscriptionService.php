@@ -154,6 +154,9 @@ class SubscriptionService
             return $result;
         } catch (Throwable $e) {
             $db->transRollback();
+            // CI4 keeps the connection flagged as failed after a failed query; clear it so later
+            // transactions in the same process (e.g. the expiry-sync loop) are not silently rolled back.
+            $db->resetTransStatus();
 
             throw $e;
         }
@@ -198,9 +201,18 @@ class SubscriptionService
         $subscription = $this->subscriptions->find($subscriptionId);
         $plan         = $this->plans->find($subscription['plan_id']);
 
+        // A company the platform admin suspended or cancelled stays that way: renewing or
+        // re-planning a subscription must never silently lift it. Only an explicit
+        // "Activate company" (CompanyService::activate) does. The one change allowed here is
+        // escalating a suspended company to cancelled when its subscription is cancelled.
+        $status = $subscription['status'];
+        if (in_array($company['status'] ?? '', ['suspended', 'cancelled'], true)) {
+            $status = $subscription['status'] === 'cancelled' ? 'cancelled' : $company['status'];
+        }
+
         $this->companies->update($companyId, [
             'current_subscription_id' => $subscriptionId,
-            'status'                  => $subscription['status'],
+            'status'                  => $status,
             'plan_id'                 => $subscription['plan_id'],
             'employee_limit'          => $subscription['employee_limit_override'] ?? $plan['employee_limit'],
         ]);

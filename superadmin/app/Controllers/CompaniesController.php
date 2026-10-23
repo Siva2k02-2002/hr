@@ -24,6 +24,7 @@ class CompaniesController extends BaseController
     public function index()
     {
         $model = (new CompanyModel())->withPlan();
+        $model->withCurrentSubscription();
 
         $search = trim((string) $this->request->getGet('q'));
         $status = (string) $this->request->getGet('status');
@@ -36,7 +37,8 @@ class CompaniesController extends BaseController
                 ->groupEnd();
         }
         if ($status !== '') {
-            $model->where('companies.status', $status);
+            // Same definition as the dashboard counts: the current subscription's state, in date.
+            $model->whereEffectiveStatus($status, date('Y-m-d'));
         }
         if ($planId !== '') {
             $model->where('companies.plan_id', $planId);
@@ -237,9 +239,71 @@ class CompaniesController extends BaseController
         return redirect()->to(site_url('companies/' . $id))->with('success', 'Company updated.');
     }
 
+    /** Change the company's tenant-admin sign-in (email and/or password). The account is looked up in the company's own database. */
+    public function adminLogin($id)
+    {
+        $company = (new CompanyModel())->find($id);
+        if (! $company) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        try {
+            $admin = (new \App\Services\TenantAdminLoginService())->describe((int) $id);
+        } catch (RuntimeException $e) {
+            return redirect()->to(site_url('companies/' . $id))->with('error', $e->getMessage());
+        } catch (Throwable) {
+            return redirect()->to(site_url('companies/' . $id))->with('error', 'Could not load this company\'s administrator.');
+        }
+
+        return view('companies/admin_login', [
+            'title'   => 'Change Admin Login — ' . $company['name'],
+            'company' => $company,
+            'admin'   => $admin,
+            'errors'  => session()->getFlashdata('admin_login_errors') ?? [],
+        ]);
+    }
+
+    public function updateAdminLogin($id)
+    {
+        $company = (new CompanyModel())->find($id);
+        if (! $company) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+        $back = site_url('companies/' . $id . '/admin-login');
+
+        if ($this->request->getPost('confirm') !== '1') {
+            return redirect()->to($back)->withInput()->with('admin_login_errors', ['confirm' => 'Tick the confirmation box to continue.'])->with('error', 'Please confirm the change.');
+        }
+
+        try {
+            $result = (new \App\Services\TenantAdminLoginService())->update(
+                (int) $id,
+                (string) $this->request->getPost('email'),
+                (string) $this->request->getPost('password'),
+                (string) $this->request->getPost('password_confirm')
+            );
+        } catch (RuntimeException $e) {
+            return redirect()->to($back)->withInput()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            log_message('error', 'Tenant admin login update failed for company {id}: {msg}', ['id' => (int) $id, 'msg' => $e->getMessage()]);
+
+            return redirect()->to($back)->withInput()->with('error', 'The admin login could not be changed. Nothing was changed.');
+        }
+
+        if ($result['errors'] !== []) {
+            return redirect()->to($back)->withInput()->with('admin_login_errors', $result['errors'])->with('error', 'Please correct the highlighted fields.');
+        }
+
+        if ($result['changed'] === []) {
+            return redirect()->to($back)->with('success', 'Nothing to change — the values already match.');
+        }
+
+        return redirect()->to(site_url('companies/' . $id))->with('success', 'Admin login updated (' . implode(' and ', $result['changed']) . ').');
+    }
+
     public function activate($id)
     {
-        (new CompanyService())->setStatus((int) $id, 'active');
+        (new CompanyService())->activate((int) $id);
 
         return redirect()->back()->with('success', 'Company activated.');
     }

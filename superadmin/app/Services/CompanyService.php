@@ -85,6 +85,23 @@ class CompanyService
         );
     }
 
+    /**
+     * The explicit reactivation path. Sets the company to its current subscription's state
+     * (trial/active/expiring) so the two never disagree; any other subscription state falls back
+     * to 'active' and TenantResolver still gates access on the subscription itself.
+     */
+    public function activate(int $companyId): void
+    {
+        $company = $this->companies->find($companyId);
+        $sub     = $company && $company['current_subscription_id']
+            ? (new \App\Models\SubscriptionModel())->where('company_id', $companyId)->find((int) $company['current_subscription_id'])
+            : null;
+
+        $status = in_array($sub['status'] ?? '', ['trial', 'active', 'expiring'], true) ? $sub['status'] : 'active';
+
+        $this->setStatus($companyId, $status);
+    }
+
     public function archive(int $companyId): void
     {
         $old = $this->companies->find($companyId);

@@ -8,6 +8,11 @@
 </div>
 
 <div class="card bg-white p-4" style="max-width:640px;">
+  <?php if (! empty($errors)): ?>
+    <div class="alert alert-danger py-2 small" role="alert">
+      <?php foreach ($errors as $message): ?><div><?= esc($message) ?></div><?php endforeach; ?>
+    </div>
+  <?php endif; ?>
   <form method="post" action="<?= $isEdit ? site_url('subscriptions/' . $subscription['id']) : site_url('subscriptions') ?>">
     <?= csrf_field() ?>
 
