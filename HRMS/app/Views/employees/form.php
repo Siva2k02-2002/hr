@@ -8,7 +8,7 @@
 <?php endif; ?>
 
 <div class="card">
-  <form method="post" action="<?= $isEdit ? site_url('employees/' . $employee['id']) : site_url('employees') ?>">
+  <form method="post" novalidate id="employeeForm" action="<?= $isEdit ? site_url('employees/' . $employee['id']) : site_url('employees') ?>">
     <?= csrf_field() ?>
 
     <ul class="nav nav-tabs mb-3" role="tablist" id="employeeFormTabs">
@@ -291,7 +291,10 @@
     </div>
 
     <div class="d-flex gap-2 mt-4">
-      <button type="submit" class="btn btn-primary"><?= $isEdit ? 'Save changes' : 'Create employee' ?></button>
+      <?php if (! $isEdit): ?>
+        <button type="button" class="btn btn-outline-primary" id="employeeFormNext">Next</button>
+      <?php endif; ?>
+      <button type="submit" id="employeeFormSubmit" class="btn btn-primary <?= $isEdit ? '' : 'd-none' ?>"><?= $isEdit ? 'Save changes' : 'Create employee' ?></button>
       <a href="<?= $isEdit ? site_url('employees/' . $employee['id']) : site_url('employees') ?>" class="btn btn-outline-secondary">Cancel</a>
     </div>
   </form>
@@ -345,12 +348,17 @@
     var form = document.querySelector('#f-basic')?.closest('form');
     if (! form) { return; }
 
+    var tabButtons = Array.prototype.slice.call(form.querySelectorAll('#employeeFormTabs [data-bs-target]'));
+    var panes = tabButtons.map(function (btn) { return document.querySelector(btn.getAttribute('data-bs-target')); });
+
     var tabButtonFor = function (pane) {
       return pane ? document.querySelector('[data-bs-target="#' + pane.id + '"]') : null;
     };
 
-    var showTab = function (btn) {
+    var showTab = function (btn, then) {
       if (! btn) { return; }
+      if (btn.classList.contains('active')) { if (then) { then(); } return; }
+      if (then) { btn.addEventListener('shown.bs.tab', then, { once: true }); }
       if (window.bootstrap && window.bootstrap.Tab) {
         window.bootstrap.Tab.getOrCreateInstance(btn).show();
       } else {
@@ -358,46 +366,106 @@
       }
     };
 
-    var markTabError = function (pane) {
+    var markTabError = function (pane, on) {
       var btn = tabButtonFor(pane);
-      if (btn) { btn.classList.add('has-error'); }
+      if (btn) { btn.classList.toggle('has-error', on !== false); }
     };
 
-    var clearTabErrors = function () {
-      form.querySelectorAll('#employeeFormTabs .nav-link.has-error').forEach(function (btn) {
-        btn.classList.remove('has-error');
+    var fieldsIn = function (pane) {
+      return Array.prototype.filter.call(pane.querySelectorAll('input, select, textarea'), function (f) {
+        return f.willValidate && f.type !== 'hidden';
       });
     };
 
-    // A required field inside a hidden Bootstrap tab-pane can't be focused,
-    // so the browser silently blocks submission with no visible cue. Jump to
-    // the first invalid field's tab so native validation can show/focus it.
-    var firstInvalidSeen = false;
-    form.addEventListener('invalid', function (e) {
-      var field = e.target;
-      var pane  = field.closest('.tab-pane');
+    var clearFieldError = function (field) {
+      field.classList.remove('is-invalid');
+      var fb = field.nextElementSibling;
+      if (fb && fb.dataset.jsFeedback) { fb.remove(); }
+    };
 
-      markTabError(pane);
+    var setFieldError = function (field) {
+      var msg = field.validity.valueMissing ? 'This field is required.' : (field.validationMessage || 'Invalid value.');
       field.classList.add('is-invalid');
-
-      if (! firstInvalidSeen) {
-        firstInvalidSeen = true;
-        showTab(tabButtonFor(pane));
-        window.requestAnimationFrame(function () {
-          field.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          field.reportValidity();
-        });
+      var fb = field.nextElementSibling;
+      if (! fb || ! fb.classList.contains('invalid-feedback')) {
+        fb = document.createElement('div');
+        fb.className = 'invalid-feedback';
+        field.insertAdjacentElement('afterend', fb);
       }
-    }, true);
+      fb.dataset.jsFeedback = '1';
+      fb.textContent = msg;
+    };
 
-    form.addEventListener('submit', function () {
-      firstInvalidSeen = false;
-      clearTabErrors();
+    // Validates one pane, showing errors only for its own fields.
+    // Returns the first invalid field, or null when the pane is valid.
+    var validatePane = function (pane) {
+      var first = null;
+      fieldsIn(pane).forEach(function (f) {
+        if (f.checkValidity()) { clearFieldError(f); return; }
+        setFieldError(f);
+        if (! first) { first = f; }
+      });
+      markTabError(pane, !! first);
+      return first;
+    };
+
+    var focusField = function (field) {
+      field.focus({ preventScroll: true });
+      field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+
+    var activeIndex = function () {
+      return tabButtons.findIndex(function (b) { return b.classList.contains('active'); });
+    };
+
+    var syncNext = function () {
+      var next = document.getElementById('employeeFormNext');
+      var last = activeIndex() >= tabButtons.length - 1;
+      if (next) { next.classList.toggle('d-none', last); }
+      // Create mode: the submit button only appears on the final tab.
+      var submit = document.getElementById('employeeFormSubmit');
+      if (next && submit) { submit.classList.toggle('d-none', ! last); }
+    };
+    tabButtons.forEach(function (b) { b.addEventListener('shown.bs.tab', syncNext); });
+    syncNext();
+
+    var nextBtn = document.getElementById('employeeFormNext');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        var i = activeIndex();
+        var bad = validatePane(panes[i]);
+        if (bad) { focusField(bad); return; }
+        if (i < tabButtons.length - 1) { showTab(tabButtons[i + 1]); }
+      });
+    }
+
+    // novalidate disables browser-native blocking; validate every pane here so
+    // an invalid field in an earlier tab is reported instead of lost.
+    form.addEventListener('submit', function (e) {
+      var firstBad = null;
+      panes.forEach(function (pane) {
+        var bad = validatePane(pane);
+        if (bad && ! firstBad) { firstBad = bad; }
+      });
+      if (! firstBad) { return; }
+      e.preventDefault();
+      e.stopPropagation(); // keep the global "Saving…" double-submit guard from firing
+      showTab(tabButtonFor(firstBad.closest('.tab-pane')), function () { focusField(firstBad); });
     });
 
-    form.addEventListener('input', function (e) {
-      if (e.target.checkValidity()) { e.target.classList.remove('is-invalid'); }
-    }, true);
+    var revalidate = function (e) {
+      var f = e.target;
+      if (! f.classList || ! f.classList.contains('is-invalid')) { return; }
+      if (f.checkValidity()) {
+        clearFieldError(f);
+        var pane = f.closest('.tab-pane');
+        if (pane && ! pane.querySelector('.is-invalid')) { markTabError(pane, false); }
+      } else {
+        setFieldError(f);
+      }
+    };
+    form.addEventListener('input', revalidate);
+    form.addEventListener('change', revalidate);
 
     // Server round-trip: jump straight to the tab holding the first
     // server-reported error instead of always resetting to Basic Information.

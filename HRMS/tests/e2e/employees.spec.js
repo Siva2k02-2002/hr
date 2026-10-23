@@ -87,6 +87,45 @@ test.describe('Employee Master', () => {
     await expect(page.locator('.profile-meta h1')).toContainText('Playwright Tester');
   });
 
+  test('add employee: Next validates per tab and submit jumps to first invalid tab', async ({ page }) => {
+    await page.goto('/employees/create');
+    const next = page.locator('#employeeFormNext');
+    await expect(page.locator('#employeeFormSubmit')).toBeHidden();
+
+    // Invalid Basic: stay put, errors only on this tab.
+    await next.click();
+    await expect(page.locator('#f-basic')).toHaveClass(/active/);
+    await expect(page.locator('#f-basic .invalid-feedback')).toHaveCount(2);
+    await expect(page.locator('#f-contact .is-invalid, #f-org .is-invalid')).toHaveCount(0);
+
+    // Valid Basic -> Contact (values kept).
+    await page.fill('input[name="first_name"]', 'Nav');
+    await expect(page.locator('input[name="first_name"]')).not.toHaveClass(/is-invalid/);
+    await page.fill('input[name="last_name"]', 'Tester');
+    await next.click();
+    await expect(page.locator('#f-contact')).toHaveClass(/active/);
+
+    // Invalid Contact: stay.
+    await next.click();
+    await expect(page.locator('#f-contact')).toHaveClass(/active/);
+    await expect(page.locator('input[name="mobile"]')).toHaveClass(/is-invalid/);
+
+    await page.fill('input[name="mobile"]', '9911223344');
+    await next.click();
+    await expect(page.locator('#f-org')).toHaveClass(/active/);
+    await next.click();
+    await expect(page.locator('#f-login')).toHaveClass(/active/);
+    await expect(page.locator('#employeeFormSubmit')).toBeVisible();
+    await expect(next).toBeHidden();
+
+    // Submit from Organization with a hole in the earlier tab: blocked, jumps back.
+    await page.locator('input[name="first_name"]').evaluate((el) => { el.value = ''; });
+    await page.getByRole('button', { name: 'Create employee' }).click();
+    await expect(page.locator('#f-basic')).toHaveClass(/active/);
+    await expect(page.locator('input[name="first_name"]')).toBeFocused();
+    await expect(page).toHaveURL(/employees\/create/);
+  });
+
   test('profile tabs load and bank number is masked', async ({ page }, testInfo) => {
     await page.goto('/employees/2'); // Priya Sharma, seeded demo data
     await expect(page.locator('.profile-meta h1')).toContainText('Priya');
